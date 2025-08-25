@@ -105,7 +105,10 @@ public class LineManager : MonoBehaviour
             img.color = color;
 
         (Vector2Int, Vector2Int) key = (from, to);
-        if (isHover) hoverLines[key] = go; else fixedLines[key] = go;
+        if (isHover)
+            hoverLines[key] = go;
+        else 
+            fixedLines[key] = go;
         return go;
     }
 
