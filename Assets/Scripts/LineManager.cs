@@ -11,7 +11,7 @@ public class LineManager : MonoBehaviour
     [Header("Grid Settings")]
     // ƒQ[ƒ€”Õ–Ê‚Ìƒpƒlƒ‹
     [SerializeField] private RectTransform panel;
-    // ü‚ğŠi”[‚·‚é RectTransform(LineContainer)
+    // ü‚ğŠi”[‚·‚é
     [SerializeField] private RectTransform lineContainer;
     // s”
     [SerializeField] public int rows = 8;
