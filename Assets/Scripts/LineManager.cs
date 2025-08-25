@@ -101,7 +101,8 @@ public class LineManager : MonoBehaviour
         rt.rotation = Quaternion.Euler(0, 0, angle);
 
         Image img = go.GetComponent<Image>();
-        if (img) img.color = color;
+        if (img)
+            img.color = color;
 
         (Vector2Int, Vector2Int) key = (from, to);
         if (isHover) hoverLines[key] = go; else fixedLines[key] = go;
