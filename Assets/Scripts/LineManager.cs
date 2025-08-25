@@ -137,7 +137,8 @@ public class LineManager : MonoBehaviour
     /// </summary>
     public void ClearHoverLines()
     {
-        foreach (var go in hoverLines.Values) Object.Destroy(go);
+        foreach (var go in hoverLines.Values)
+            Object.Destroy(go);
         hoverLines.Clear();
     }
 
@@ -160,7 +161,8 @@ public class LineManager : MonoBehaviour
             PlaceSegment(path[i], path[i + 1], fixedColor, false);
         }
         // êËóLÉZÉãÇ…í«â¡
-        foreach (var c in path) fixedOccupiedCells.Add(c);
+        foreach (var c in path)
+            fixedOccupiedCells.Add(c);
     }
 
     /// <summary>
@@ -168,8 +170,10 @@ public class LineManager : MonoBehaviour
     /// </summary>
     public void ClearAllLines()
     {
-        foreach (var go in fixedLines.Values) Object.Destroy(go);
-        foreach (var go in hoverLines.Values) Object.Destroy(go);
+        foreach (var go in fixedLines.Values)
+            Object.Destroy(go);
+        foreach (var go in hoverLines.Values)
+            Object.Destroy(go);
         fixedLines.Clear();
         hoverLines.Clear();
         fixedOccupiedCells.Clear();
