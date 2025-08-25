@@ -151,7 +151,8 @@ public class LineManager : MonoBehaviour
     {
         if (path == null || path.Count < 2) 
         {
-            ClearHoverLines(); return;
+            ClearHoverLines();
+            return;
         }
 
         // Šù‘¶ü‚ðÁ‚µ‚ÄAŒÅ’èü‚Æ‚µ‚ÄÄ•`‰æ
