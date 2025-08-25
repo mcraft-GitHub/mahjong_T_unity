@@ -43,8 +43,10 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         Type = type;
         game = gameRef;
         IsMatched = false;
-        if (tileText != null) tileText.text = type;
-        if (image != null) image.color = originalColor;
+        if (tileText != null)
+            tileText.text = type;
+        if (image != null)
+            image.color = originalColor;
     }
 
     /// <summary>
