@@ -9,16 +9,21 @@ using UnityEngine.UI;
 public class LineManager : MonoBehaviour
 {
     [Header("Grid Settings")]
-    [SerializeField] private RectTransform panel;         // ƒQ[ƒ€”Õ–Ê‚Ìƒpƒlƒ‹
-    [SerializeField] private RectTransform lineContainer; // ü‚ğŠi”[‚·‚é RectTransform(LineContainer)
-    [SerializeField] public int rows = 8;                // s”
-    [SerializeField] public int columns = 8;             // —ñ”
+    // ƒQ[ƒ€”Õ–Ê‚Ìƒpƒlƒ‹
+    [SerializeField] private RectTransform panel;
+    // ü‚ğŠi”[‚·‚é RectTransform(LineContainer)
+    [SerializeField] private RectTransform lineContainer;
+    // s”
+    [SerializeField] public int rows = 8;
+    // —ñ”
+    [SerializeField] public int columns = 8;
 
     [Header("Line Prefab")]
     [SerializeField] private GameObject linePrefab;
 
     [Header("Style")]
-    [SerializeField] private float lineThickness = 6f; // ‘¾‚³
+    // ‘¾‚³
+    [SerializeField] private float lineThickness = 6f;
 
     // Šm’èü‚Ì‰¼•`‰æ
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> fixedLines = new();
