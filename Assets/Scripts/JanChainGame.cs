@@ -5,6 +5,9 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
+/// <summary>
+/// ゲームの進行・UI・盤面・タイル制御を行うクラス
+/// </summary>
 public class JanChainGame : MonoBehaviour
 {
     [Header("Game Settings")]
@@ -50,7 +53,23 @@ public class JanChainGame : MonoBehaviour
     private Color fixedColor = new Color(0.15f, 0.8f, 0.2f, 1f); // 確定緑
 
 
-    // ペアとその最短距離をまとめた構造体
+    public int SelectedTilesCount => selectedTiles.Count;
+
+
+    /// <summary>
+    /// ペア配列情報
+    /// </summary>
+    private class PairPlacement
+    {
+        public Vector2Int a;
+        public Vector2Int b;
+        public string type;
+        public PairPlacement(Vector2Int a, Vector2Int b, string type) { this.a = a; this.b = b; this.type = type; }
+    }
+
+    /// <summary>
+    /// ペアとその最短距離をまとめた構造体
+    /// </summary>
     private class PairWithDist
     {
         public PairPlacement pair;
@@ -58,7 +77,9 @@ public class JanChainGame : MonoBehaviour
         public PairWithDist(PairPlacement p, int d) { pair = p; dist = d; }
     }
 
-
+    /// <summary>
+    /// ゲーム開始時にUI等が機能し、タイトル画面を表示する
+    /// </summary>
     private void Start()
     {
         if (startButton != null) startButton.onClick.AddListener(StartNewGame);
@@ -108,7 +129,10 @@ public class JanChainGame : MonoBehaviour
         }
     }
 
-    // 表示panel切り替え(Game・Title・Victory)
+    /// <summary>
+    /// 表示panel切り替え(Game・Title・Victory)
+    /// </summary>
+    /// <param name="screen"> 切り替えるPanel </param>
     private void ShowScreen(GameObject screen)
     {
         titleScreen.SetActive(false);
@@ -117,7 +141,9 @@ public class JanChainGame : MonoBehaviour
         if (screen != null) screen.SetActive(true);
     }
 
-    // 盤面のリセット
+    /// <summary>
+    /// 盤面のリセット
+    /// </summary>
     public void StartNewGame()
     {
         ResetGame();
@@ -139,6 +165,9 @@ public class JanChainGame : MonoBehaviour
         UpdateUI();
     }
 
+    /// <summary>
+    /// ゲームの盤面をリセット
+    /// </summary>
     private void ResetGame()
     {
         if (tiles != null)
@@ -154,6 +183,9 @@ public class JanChainGame : MonoBehaviour
         isDragging = false;
     }
 
+    /// <summary>
+    /// 経過時間の更新
+    /// </summary>
     private IEnumerator UpdateTimer()
     {
         while (gameActive)
@@ -166,11 +198,17 @@ public class JanChainGame : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 残りペア数表示の更新
+    /// </summary>
     private void UpdateUI()
     {
         if (pairsLeftText != null) pairsLeftText.text = (totalPairs - matchedPairs).ToString();
     }
 
+    /// <summary>
+    /// ゲーム完了時経過時間の表示とPanel切替
+    /// </summary>
     private void HandleVictory()
     {
         gameActive = false;
@@ -181,6 +219,10 @@ public class JanChainGame : MonoBehaviour
         ShowScreen(victoryScreen);
     }
 
+    /// <summary>
+    /// タイルクリック時処理
+    /// </summary>
+    /// <param name="tile"> 対応タイル </param>
     public void OnTileClicked(Tile tile)
     {
         if (!gameActive || tile == null || tile.IsMatched) return;
@@ -193,8 +235,12 @@ public class JanChainGame : MonoBehaviour
         tile.Select();
     }
 
-    public int SelectedTilesCount => selectedTiles.Count;
-
+    /// <summary>
+    /// 指定したタイルが隣にあるか
+    /// </summary>
+    /// <param name="a"> セルA座標 </param>
+    /// <param name="b"> セルB座標 </param>
+    /// <returns></returns>
     private static bool IsAdjacent(Vector2Int a, Vector2Int b)
     {
         int dx = Mathf.Abs(a.x - b.x);
@@ -202,7 +248,11 @@ public class JanChainGame : MonoBehaviour
         return (dx + dy) == 1;
     }
 
-    // ドラック中の処理
+    /// <summary>
+    /// ドラック中の処理(経路の延長,経路を戻る処理)
+    /// </summary>
+    /// <param name="cell"> 現在カーソルのあるセル座標 </param>
+    /// <param name="startTile"> ドラック開始セル </param>
     private void TryExtendOrBacktrack(Vector2Int cell, Tile startTile)
     {
         if (hoverPath.Count == 0) return;
@@ -254,6 +304,10 @@ public class JanChainGame : MonoBehaviour
         lineManager.DrawHoverPath(hoverPath, dragColor);
     }
 
+    /// <summary>
+    /// ドラック操作終了時、マッチ成功,失敗判定
+    /// </summary>
+    /// <param name="startTile"> ドラック開始タイル </param>
     private void FinishDrag(Tile startTile)
     {
         isDragging = false;
@@ -283,7 +337,10 @@ public class JanChainGame : MonoBehaviour
         }
     }
 
-    // 経路が正しく同種を結んだ時のみ呼ばれる
+    /// <summary>
+    /// 経路が正しく同種を結んだ時のみ呼ばれる
+    /// </summary>
+    /// <param name="path"> 経路セル列 </param>
     public void ConfirmMatch(List<Vector2Int> path)
     {
         if (path == null || path.Count < 2) return;
@@ -306,7 +363,11 @@ public class JanChainGame : MonoBehaviour
         if (matchedPairs >= totalPairs) HandleVictory();
     }
 
-    // 指定セルを返す
+    /// <summary>
+    /// 指定セルを返す
+    /// </summary>
+    /// <param name="cell"></param>
+    /// <returns></returns>
     public Tile TileAt(Vector2Int cell)
     {
         if (tiles == null) return null;
@@ -315,7 +376,9 @@ public class JanChainGame : MonoBehaviour
         return tiles[cell.x, cell.y];
     }
 
-    // ランダム配置
+    /// <summary>
+    /// ランダム配置
+    /// </summary>
     private void GenerateBoardSafe()
     {
         // 決定する種類数
@@ -366,7 +429,9 @@ public class JanChainGame : MonoBehaviour
         }
     }
 
-    // 経路を無視してランダムにペアを配置するフォールバック
+    /// <summary>
+    /// 経路を無視してランダムにペアを配置するフォールバック処理
+    /// </summary>
     private void FallbackPlace(List<string> types)
     {
         List<Vector2Int> allCells = new List<Vector2Int>();
@@ -384,7 +449,9 @@ public class JanChainGame : MonoBehaviour
         totalPairs = types.Count;
     }
 
-    // Pair 配置を UI に反映
+    /// <summary>
+    /// ペアリスト を UI に反映
+    /// </summary>
     private void PlaceTilesFromPairs(List<PairPlacement> pairs)
     {
         // 盤面のタイル配列を初期化
@@ -398,7 +465,9 @@ public class JanChainGame : MonoBehaviour
         }
     }
 
-    // お互いに干渉しない経路で繋げるか
+    /// <summary>
+    /// お互いに干渉しない経路で繋げるか
+    /// </summary>
     private bool TryRouteAllPairs(List<PairPlacement> pairs)
     {
         // 全てのペアの両端を占有
@@ -432,7 +501,15 @@ public class JanChainGame : MonoBehaviour
         return ok;
     }
 
-    // 再帰ルーティング
+    /// <summary>
+    /// 再帰的にペアの経路を探索して全てつなげる
+    /// </summary>
+    /// <param name="pairs"></param>
+    /// <param name="idx"></param>
+    /// <param name="tileOccupied"></param>
+    /// <param name="occupiedPaths"></param>
+    /// <param name="chosenPaths"></param>
+    /// <returns></returns>
     private bool RoutePairsRecursive(List<PairPlacement> pairs, int idx, bool[,] tileOccupied, bool[,] occupiedPaths, List<List<Vector2Int>> chosenPaths)
     {
         // 全ペア処理済みなら成功
@@ -478,7 +555,16 @@ public class JanChainGame : MonoBehaviour
         return false; // 全経路失敗
     }
 
-    // ペアの 始点から終点までの経路をDFSで列挙
+    /// <summary>
+    /// ペアの 始点から終点までの経路をDFSで列挙
+    /// </summary>
+    /// <param name="start"> 開始セル </param>
+    /// <param name="end"> 終点セル </param>
+    /// <param name="tileOccupied"> タイルが置かれているセルをtrueとする2次元配列 </param>
+    /// <param name="occupiedPaths"> 確定している経路で使用しているセルをtrueとする2次元配列 </param>
+    /// <param name="maxPaths"> 列挙する経路の最大数 </param>
+    /// <param name="slack"> 探索で見つけた経路(セル座標リスト)のリスト </param>
+    /// <returns></returns>
     private List<List<Vector2Int>> EnumeratePaths(Vector2Int start, Vector2Int end, bool[,] tileOccupied, bool[,] occupiedPaths, int maxPaths, int slack)
     {
         // まず最短距離を BFS で求める
@@ -546,7 +632,14 @@ public class JanChainGame : MonoBehaviour
         return results;
     }
 
-    // BFSで 始点から終点 の最短距離を求める。
+    /// <summary>
+    /// BFSで 始点から終点 の最短距離を求める。
+    /// </summary>
+    /// <param name="tileOccupied"> タイルが置かれているセルをtrueとする2次元配列 </param>
+    /// <param name="occupiedPaths"> 確定している経路で使用しているセルをtrueとする2次元配列 </param>
+    /// <param name="start"> 開始セル </param>
+    /// <param name="end"> 終点セル </param>
+    /// <returns></returns>
     private int ShortestDistance(bool[,] tileOccupied, bool[,] occupiedPaths, Vector2Int start, Vector2Int end)
     {
         if (start == end) return 0;
@@ -581,7 +674,11 @@ public class JanChainGame : MonoBehaviour
         return -1;
     }
 
-    // 2つのセルとその種類を保持
+    /// <summary>
+    /// 2つのセルとその種類を保持
+    /// </summary>
+    /// <param name="pos"> 配置先のセル処理 </param>
+    /// <param name="type"> 2つのセルとその種類の盤面を配置 </param>
     private void PlaceTile(Vector2Int pos, string type)
     {
         if (tilePrefab == null || gridParent == null) return;
@@ -612,21 +709,20 @@ public class JanChainGame : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// セルサイズの計算
+    /// </summary>
+    /// <returns> セル1つの幅と高さ(デフォルトは(40,40)) </returns>
     private Vector2 GetCellSize()
     {
         if (gridParent == null) return new Vector2(40f, 40f);
         return new Vector2(gridParent.rect.width / gridSize, gridParent.rect.height / gridSize);
     }
 
-    private class PairPlacement
-    {
-        public Vector2Int a;
-        public Vector2Int b;
-        public string type;
-        public PairPlacement(Vector2Int a, Vector2Int b, string type) { this.a = a; this.b = b; this.type = type; }
-    }
-
-    // リストをランダムにシャッフル(配置の偏りを防ぐ)
+    /// <summary>
+    /// リストをランダムにシャッフル(配置の偏りを防ぐ)
+    /// </summary>
+    /// <typeparam name="T"> シャッフルの要素型 </typeparam>
     private void Shuffle<T>(List<T> list)
     {
         for (int i = 0; i < list.Count; i++)
