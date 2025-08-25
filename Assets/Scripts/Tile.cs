@@ -23,7 +23,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     private void Awake()
     {
         image = GetComponent<Image>();
-        if (image != null) originalColor = image.color;
+        if (image != null)
+            originalColor = image.color;
         if (tileText == null)
             tileText = GetComponentInChildren<TMP_Text>();
     }
