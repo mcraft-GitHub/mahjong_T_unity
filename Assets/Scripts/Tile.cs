@@ -82,18 +82,17 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     /// <param name="eventData"></param>
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (game != null)
+        if (game == null) return;
+        
+        // 既に選択中のタイルがある場合は、選択タイルとのマッチ判定
+        if (game.SelectedTilesCount == 0)
         {
-            // 既に選択中のタイルがある場合は、選択タイルとのマッチ判定
-            if (game.SelectedTilesCount == 0)
-            {
-                game.OnTileClicked(this);
-            }
-            else
-            {
-                // タイルクリックではドラッグ開始として選択を更新する
-                game.OnTileClicked(this);
-            }
+            game.OnTileClicked(this);
+        }
+        else
+        {
+            // タイルクリックではドラッグ開始として選択を更新する
+            game.OnTileClicked(this);
         }
     }
 }

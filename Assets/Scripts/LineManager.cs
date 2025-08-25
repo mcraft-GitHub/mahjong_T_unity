@@ -9,16 +9,16 @@ using UnityEngine.UI;
 public class LineManager : MonoBehaviour
 {
     [Header("Grid Settings")]
-    public RectTransform panel;         // ゲーム盤面のパネル
-    public RectTransform lineContainer; // 線を格納する RectTransform(LineContainer)
-    public int rows = 8;                // 行数
-    public int columns = 8;             // 列数
+    [SerializeField] private RectTransform panel;         // ゲーム盤面のパネル
+    [SerializeField] private RectTransform lineContainer; // 線を格納する RectTransform(LineContainer)
+    [SerializeField] public int rows = 8;                // 行数
+    [SerializeField] public int columns = 8;             // 列数
 
     [Header("Line Prefab")]
-    public GameObject linePrefab;
+    [SerializeField] private GameObject linePrefab;
 
     [Header("Style")]
-    public float lineThickness = 6f; // 太さ
+    [SerializeField] private float lineThickness = 6f; // 太さ
 
     // 確定線の仮描画
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> fixedLines = new();
@@ -89,7 +89,7 @@ public class LineManager : MonoBehaviour
     /// <returns> 生成された線のオブジェクト </returns>
     private GameObject PlaceSegment(Vector2Int from, Vector2Int to, Color color, bool isHover)
     {
-        GameObject go = Object.Instantiate(linePrefab, lineContainer);
+        GameObject go = Instantiate(linePrefab, lineContainer);
         RectTransform rt = go.GetComponent<RectTransform>();
 
         Vector2 p0 = CellToAnchored(from);
@@ -100,10 +100,10 @@ public class LineManager : MonoBehaviour
         float angle = Mathf.Atan2(p1.y - p0.y, p1.x - p0.x) * Mathf.Rad2Deg;
         rt.rotation = Quaternion.Euler(0, 0, angle);
 
-        var img = go.GetComponent<Image>();
+        Image img = go.GetComponent<Image>();
         if (img) img.color = color;
 
-        var key = (from, to);
+        (Vector2Int, Vector2Int) key = (from, to);
         if (isHover) hoverLines[key] = go; else fixedLines[key] = go;
         return go;
     }
@@ -139,7 +139,10 @@ public class LineManager : MonoBehaviour
     /// <param name="fixedColor"> 確定線の色 </param>
     public void CommitHoverPath(List<Vector2Int> path, Color fixedColor)
     {
-        if (path == null || path.Count < 2) { ClearHoverLines(); return; }
+        if (path == null || path.Count < 2) 
+        {
+            ClearHoverLines(); return;
+        }
 
         // 既存線を消して、固定線として再描画
         ClearHoverLines();
@@ -170,16 +173,16 @@ public class LineManager : MonoBehaviour
     {
         foreach (var kv in fixedLines)
         {
-            var from = kv.Key.Item1;
-            var to = kv.Key.Item2;
-            var rt = kv.Value.GetComponent<RectTransform>();
+            Vector2Int from = kv.Key.Item1;
+            Vector2Int to = kv.Key.Item2;
+            RectTransform rt = kv.Value.GetComponent<RectTransform>();
             UpdateSegmentTransform(rt, from, to);
         }
         foreach (var kv in hoverLines)
         {
-            var from = kv.Key.Item1;
-            var to = kv.Key.Item2;
-            var rt = kv.Value.GetComponent<RectTransform>();
+            Vector2Int from = kv.Key.Item1;
+            Vector2Int to = kv.Key.Item2;
+            RectTransform rt = kv.Value.GetComponent<RectTransform>();
             UpdateSegmentTransform(rt, from, to);
         }
     }
