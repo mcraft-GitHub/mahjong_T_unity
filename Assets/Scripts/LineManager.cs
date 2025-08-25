@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 
+/// ”Õ–Ê‚É•`‰æ‚³‚ê‚éü‚ğŠÇ—‚·‚éƒNƒ‰ƒX
 /// </summary>
 
 public class LineManager : MonoBehaviour
