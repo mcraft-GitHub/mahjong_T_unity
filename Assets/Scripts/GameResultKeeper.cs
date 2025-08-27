@@ -10,6 +10,7 @@ public class GameResultKeeper : MonoBehaviour
         get;
         private set;
     }
+    private const int MINUTES_PER_HOUR = 60;
 
     private int elapsed = 0;
     private int minutes = 0;
@@ -45,8 +46,8 @@ public class GameResultKeeper : MonoBehaviour
     public void MakeResultTime()
     {
         elapsed = Mathf.FloorToInt(Time.time - startTime);
-        minutes = (int)(elapsed / 60f);
-        seconds = (int)(elapsed % 60f);
+        minutes = elapsed / MINUTES_PER_HOUR;
+        seconds = elapsed % MINUTES_PER_HOUR;
     }
 
     /// <summary>
