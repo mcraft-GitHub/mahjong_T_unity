@@ -15,8 +15,10 @@ public class ResultManager : MonoBehaviour
 
     void Start()
     {
-        if (playAgainButton != null) playAgainButton.onClick.AddListener(ChangeGameScene);
-        if (backToTitleButton != null) backToTitleButton.onClick.AddListener(ChangeTitleScene);
+        if (playAgainButton != null)
+            playAgainButton.onClick.AddListener(ChangeGameScene);
+        if (backToTitleButton != null)
+            backToTitleButton.onClick.AddListener(ChangeTitleScene);
 
         SetFinalTimeText();
     }
