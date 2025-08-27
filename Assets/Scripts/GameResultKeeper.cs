@@ -11,7 +11,7 @@ public class GameResultKeeper : MonoBehaviour
         private set;
     }
 
-    private float elapsed = 0.0f;
+    private int elapsed = 0;
     private int minutes = 0;
     private int seconds = 0;
     private float startTime;
