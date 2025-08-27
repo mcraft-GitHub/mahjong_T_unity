@@ -16,7 +16,7 @@ public class GameResultKeeper : MonoBehaviour
     private int seconds = 0;
     private float startTime;
 
-    void Start()
+    void Awake()
     {
         if (Instance != null && Instance != this)
         {
@@ -44,9 +44,9 @@ public class GameResultKeeper : MonoBehaviour
     /// </summary>
     public void MakeResultTime()
     {
-        elapsed = Time.time - startTime;
-        minutes = Mathf.FloorToInt(elapsed / 60f);
-        seconds = Mathf.FloorToInt(elapsed % 60f);
+        elapsed = Mathf.FloorToInt(Time.time - startTime);
+        minutes = (int)(elapsed / 60f);
+        seconds = (int)(elapsed % 60f);
     }
 
     /// <summary>
