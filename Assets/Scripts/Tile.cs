@@ -15,7 +15,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public string Type { get; private set; }
     public bool IsMatched { get; private set; } = false;
 
-    private JanChainGame game;
+    private /*JanChainGame*/GameManager game;
     private Image image;
     private Color originalColor;
     [SerializeField] private TMP_Text tileText;
@@ -36,7 +36,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     /// <param name="col"> —ñ </param>
     /// <param name="type"> í—Ş </param>
     /// <param name="gameRef"> ƒQ[ƒ€–{‘Ì‚Ö‚ÌQÆ </param>
-    public void Setup(int row, int col, string type, JanChainGame gameRef)
+    public void Setup(int row, int col, string type, /*JanChainGame*/GameManager gameRef)
     {
         Row = row;
         Col = col;

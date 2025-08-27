@@ -16,6 +16,7 @@ public class GameResultKeeper : MonoBehaviour
     private int minutes = 0;
     private int seconds = 0;
     private float startTime;
+    private string timeText;
 
     void Awake()
     {
@@ -43,11 +44,15 @@ public class GameResultKeeper : MonoBehaviour
     /// 最終経過タイムの計算
     /// GameScene から ResultScene へ遷移する際に使用
     /// </summary>
-    public void MakeResultTime()
+    public string MakeResultTime()
     {
         elapsed = Mathf.FloorToInt(Time.time - startTime);
         minutes = elapsed / MINUTES_PER_HOUR;
         seconds = elapsed % MINUTES_PER_HOUR;
+
+        timeText = $"{minutes:00}:{seconds:00}";
+
+        return timeText;
     }
 
     /// <summary>

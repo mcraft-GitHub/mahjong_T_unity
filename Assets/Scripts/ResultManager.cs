@@ -30,9 +30,8 @@ public class ResultManager : MonoBehaviour
     {
         if (GameResultKeeper.Instance == null) return;
 
-        int minutes = GameResultKeeper.Instance.GetMinutes();
-        int seconds = GameResultKeeper.Instance.GetSeconds();
-        if (finalTimeText != null) finalTimeText.text = $"{minutes:00}:{seconds:00}";
+        if (finalTimeText != null)
+            finalTimeText.text = GameResultKeeper.Instance.MakeResultTime();
     }
 
     /// <summary>

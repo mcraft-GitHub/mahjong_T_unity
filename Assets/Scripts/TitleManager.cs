@@ -11,11 +11,12 @@ public class TitleManager : MonoBehaviour
 
     void Start()
     {
-        if (startButton != null) startButton.onClick.AddListener(ChangeGameScene);
+        if (startButton != null)
+            startButton.onClick.AddListener(ChangeGameScene);
     }
 
     /// <summary>
-    /// GameScene へシーン遷移
+    /// GameScene へ シーン遷移
     /// </summary>
     void ChangeGameScene()
     {
