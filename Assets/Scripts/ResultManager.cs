@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// TitleScene を管理するクラス
+/// ResultScene を管理するクラス
 /// </summary>
 public class ResultManager : MonoBehaviour
 {
