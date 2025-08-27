@@ -42,7 +42,7 @@ public class GameResultKeeper : MonoBehaviour
     /// 最終経過タイムの計算
     /// GameScene から ResultScene へ遷移する際に使用
     /// </summary>
-    public void HandleVictory()
+    public void MakeResultTime()
     {
         elapsed = Time.time - startTime;
         minutes = Mathf.FloorToInt(elapsed / 60f);
