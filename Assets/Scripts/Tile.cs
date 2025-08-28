@@ -30,7 +30,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         private set;
     } = false;
 
-    private /*JanChainGame*/GameManager _game;
+    private GameManager _game;
     private Image _image;
     private Color _originalColor;
     [SerializeField] private TMP_Text _tileText;
