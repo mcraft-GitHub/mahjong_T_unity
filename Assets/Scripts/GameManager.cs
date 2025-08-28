@@ -68,7 +68,12 @@ public class GameManager : MonoBehaviour
         else
         {
             // 選択が無い・2つ以上ならドラッグ無効
-            if (_isDragging) { _isDragging = false; _hoverPath.Clear(); _lineManager.ClearHoverLines(); }
+            if (_isDragging)
+            {
+                _isDragging = false;
+                _hoverPath.Clear();
+                _lineManager.ClearHoverLines();
+            }
         }
     }
 
