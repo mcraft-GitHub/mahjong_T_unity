@@ -217,7 +217,6 @@ public class GameManager : MonoBehaviour
         _boardManager.ResetBoard();
 
         _matchedPairs = 0;
-
         GameResultKeeper.Instance.StartTime();
         _gameActive = true;
         _isDragging = false;
