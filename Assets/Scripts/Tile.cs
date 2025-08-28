@@ -5,7 +5,7 @@ using System.Collections;
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// ”Õã‚Ì1ƒ}ƒX‚ğ•\‚·ƒ^ƒCƒ‹‚ÌƒNƒ‰ƒX
+/// ç›¤ä¸Šã®1ãƒã‚¹ã‚’è¡¨ã™ã‚¿ã‚¤ãƒ«ã®ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class Tile : MonoBehaviour, IPointerClickHandler
 {
@@ -45,12 +45,12 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     }
 
     /// <summary>
-    /// ƒ^ƒCƒ‹‰Šú‰»
+    /// ã‚¿ã‚¤ãƒ«åˆæœŸåŒ–
     /// </summary>
-    /// <param name="row"> s </param>
-    /// <param name="col"> —ñ </param>
-    /// <param name="type"> í—Ş </param>
-    /// <param name="gameRef"> ƒQ[ƒ€–{‘Ì‚Ö‚ÌQÆ </param>
+    /// <param name="row"> è¡Œ </param>
+    /// <param name="col"> åˆ— </param>
+    /// <param name="type"> ç¨®é¡ </param>
+    /// <param name="gameRef"> ã‚²ãƒ¼ãƒ æœ¬ä½“ã¸ã®å‚ç…§ </param>
     public void Setup(int row, int col, string type, GameManager gameRef)
     {
         _row = row;
@@ -65,7 +65,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     }
 
     /// <summary>
-    /// ƒ^ƒCƒ‹‘I‘ğ‚Ì•\¦•ÏX
+    /// ã‚¿ã‚¤ãƒ«é¸æŠæ™‚ã®è¡¨ç¤ºå¤‰æ›´
     /// </summary>
     public void Select()
     {
@@ -74,7 +74,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     }
 
     /// <summary>
-    /// ‘I‘ğ‰ğœ‚Ì•\¦•ÏX
+    /// é¸æŠè§£é™¤æ™‚ã®è¡¨ç¤ºå¤‰æ›´
     /// </summary>
     public void Deselect()
     {
@@ -83,33 +83,35 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     }
 
     /// <summary>
-    /// ƒ^ƒCƒ‹‚ªƒ}ƒbƒ`‚µ‚½‚Ìˆ—
+    /// ã‚¿ã‚¤ãƒ«ãŒãƒãƒƒãƒã—ãŸæ™‚ã®å‡¦ç†
     /// </summary>
     public void Match()
     {
         _isMatched = true;
         if (_image != null)
-            _image.color = Color.gray;
+            // ãƒ‘ã‚¹ãƒ†ãƒ«ã‚ªãƒ¬ãƒ³ã‚¸(è–„ã„ã‚¢ãƒ—ãƒªã‚³ãƒƒãƒˆ)
+            _image.color = new Color(1f, 0.9f, 0.6f, 1f);
         if (_tileText != null)
-            _tileText.text = ""; // ƒ}ƒbƒ`Œã‚Í•¶š”ñ•\¦
+            // ãƒãƒƒãƒå¾Œã¯æ–‡å­—éè¡¨ç¤º
+            _tileText.text = "";
     }
 
     /// <summary>
-    /// ƒ^ƒCƒ‹‚ªƒNƒŠƒbƒN‚³‚ê‚½‚ÉŒÄ‚Î‚ê‚éˆ—
+    /// ã‚¿ã‚¤ãƒ«ãŒã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸæ™‚ã«å‘¼ã°ã‚Œã‚‹å‡¦ç†
     /// </summary>
     /// <param name="eventData"></param>
     public void OnPointerClick(PointerEventData eventData)
     {
         if (_game == null) return;
         
-        // Šù‚É‘I‘ğ’†‚Ìƒ^ƒCƒ‹‚ª‚ ‚éê‡‚ÍA‘I‘ğƒ^ƒCƒ‹‚Æ‚Ìƒ}ƒbƒ`”»’è
+        // æ—¢ã«é¸æŠä¸­ã®ã‚¿ã‚¤ãƒ«ãŒã‚ã‚‹å ´åˆã¯ã€é¸æŠã‚¿ã‚¤ãƒ«ã¨ã®ãƒãƒƒãƒåˆ¤å®š
         if (_game._selectedTilesCount == 0)
         {
             _game.OnTileClicked(this);
         }
         else
         {
-            // ƒ^ƒCƒ‹ƒNƒŠƒbƒN‚Å‚Íƒhƒ‰ƒbƒOŠJn‚Æ‚µ‚Ä‘I‘ğ‚ğXV‚·‚é
+            // ã‚¿ã‚¤ãƒ«ã‚¯ãƒªãƒƒã‚¯ã§ã¯ãƒ‰ãƒ©ãƒƒã‚°é–‹å§‹ã¨ã—ã¦é¸æŠã‚’æ›´æ–°ã™ã‚‹
             _game.OnTileClicked(this);
         }
     }
