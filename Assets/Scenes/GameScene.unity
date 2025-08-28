@@ -148,9 +148,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ca7324c8bac6f4fb98bccb4612efbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pairsLeftText: {fileID: 730062591}
-  timerText: {fileID: 1853752676}
-  restartButton: {fileID: 1584136150}
+  _pairsLeftText: {fileID: 730062591}
+  _timerText: {fileID: 1853752676}
+  _restartButton: {fileID: 1584136150}
 --- !u!4 &68154558
 Transform:
   m_ObjectHideFlags: 0
@@ -441,14 +441,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b530b67bdf4b5f42a679239a101e871, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager: {fileID: 639504741}
-  gridSize: 8
-  maxTileTypes: 6
-  tilePrefab: {fileID: 7844806200559723083, guid: 900e71d09f153dd45b8727114137313a, type: 3}
-  gridParent: {fileID: 1970477287}
-  lineManager: {fileID: 1387323520}
-  typeColors:
-  - {r: 0.9078603, g: 0, b: 1, a: 0}
+  _gameManager: {fileID: 639504741}
+  _gridSize: 8
+  _maxTileTypes: 6
+  _tilePrefab: {fileID: 7844806200559723083, guid: 900e71d09f153dd45b8727114137313a, type: 3}
+  _gridParent: {fileID: 1970477287}
+  _lineManager: {fileID: 1387323520}
+  _typeColors: []
 --- !u!4 &582404701
 Transform:
   m_ObjectHideFlags: 0
@@ -592,9 +591,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3e834b81c1617745a10b20437cd6165, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boardManager: {fileID: 582404700}
-  uiManager: {fileID: 68154557}
-  lineManager: {fileID: 1387323520}
+  _boardManager: {fileID: 582404700}
+  _uiManager: {fileID: 68154557}
+  _lineManager: {fileID: 1387323520}
 --- !u!1001 &671800674
 PrefabInstance:
   m_ObjectHideFlags: 0
