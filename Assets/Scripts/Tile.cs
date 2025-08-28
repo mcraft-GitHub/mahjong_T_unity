@@ -89,9 +89,11 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     {
         _isMatched = true;
         if (_image != null)
+            // パステルオレンジ(薄いアプリコット)
             _image.color = new Color(1f, 0.9f, 0.6f, 1f);
         if (_tileText != null)
-            _tileText.text = ""; // マッチ後は文字非表示
+            // マッチ後は文字非表示
+            _tileText.text = "";
     }
 
     /// <summary>
