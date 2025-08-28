@@ -6,29 +6,29 @@ using UnityEngine;
 /// </summary>
 public class BoardManager : MonoBehaviour
 {
-    [SerializeField] private GameManager gameManager;
+    [SerializeField] private GameManager _gameManager;
 
     [Header("Game Settings")]
-    public int gridSize = 8;
-    public int maxTileTypes = 6;
+    public int _gridSize = 8;
+    public int _maxTileTypes = 6;
 
     [Header("Tile / Grid UI")]
-    [SerializeField] private GameObject tilePrefab;
-    [SerializeField] private RectTransform gridParent;
-    [SerializeField] private LineManager lineManager;
+    [SerializeField] private GameObject _tilePrefab;
+    [SerializeField] private RectTransform _gridParent;
+    [SerializeField] private LineManager _lineManager;
 
     [Header("Colors")]
-    [SerializeField] private Color[] typeColors;
+    [SerializeField] private Color[] _typeColors;
 
-    private Tile[,] tiles;
-    private List<Tile> selectedTiles = new();
-    private int totalPairs = 0;
+    private Tile[,] _tiles;
+    private List<Tile> _selectedTiles = new();
+    private int _totalPairs = 0;
 
-    private readonly List<string> allTypes = new() { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
-    private System.Random rand = new System.Random();
-    private int maxPlacementAttempts = 800;
-    private int maxPathsPerPair = 40;
-    private int pathSlack = 6;
+    private readonly List<string> _allTypes = new() { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
+    private System.Random _rand = new System.Random();
+    private int _maxPlacementAttempts = 800;
+    private int _maxPathsPerPair = 40;
+    private int _pathSlack = 6;
 
 
     /// <summary>
@@ -36,17 +36,17 @@ public class BoardManager : MonoBehaviour
     /// </summary>
     public void ResetBoard()
     {
-        if (tiles != null)
+        if (_tiles != null)
         {
-            foreach (var t in tiles)
+            foreach (var t in _tiles)
             {
                 if (t != null && t.gameObject != null)
                     Destroy(t.gameObject);
             }
         }
-        tiles = new Tile[gridSize, gridSize];
-        selectedTiles.Clear();
-        totalPairs = 0;
+        _tiles = new Tile[_gridSize, _gridSize];
+        _selectedTiles.Clear();
+        _totalPairs = 0;
 
         ResetLine();
 
@@ -59,18 +59,18 @@ public class BoardManager : MonoBehaviour
     private void GenerateBoardSafe()
     {
         // 決定する種類数
-        int typeCount = Mathf.Min(maxTileTypes, allTypes.Count);
-        List<string> types = new List<string>(allTypes);
+        int typeCount = Mathf.Min(_maxTileTypes, _allTypes.Count);
+        List<string> types = new List<string>(_allTypes);
         Shuffle(types);
         types = types.GetRange(0, typeCount);
 
         bool success = false;
-        for (int attempt = 0; attempt < maxPlacementAttempts; attempt++)
+        for (int attempt = 0; attempt < _maxPlacementAttempts; attempt++)
         {
             // ランダムに 2*typeCount 個のセルを選ぶ
             List<Vector2Int> allCells = new List<Vector2Int>();
-            for (int x = 0; x < gridSize; x++)
-                for (int y = 0; y < gridSize; y++)
+            for (int x = 0; x < _gridSize; x++)
+                for (int y = 0; y < _gridSize; y++)
                     allCells.Add(new Vector2Int(x, y));
             Shuffle(allCells);
 
@@ -91,7 +91,7 @@ public class BoardManager : MonoBehaviour
             {
                 // 成功：UI に反映して完了
                 PlaceTilesFromPairs(pairs);
-                totalPairs = typeCount;
+                _totalPairs = typeCount;
                 success = true;
                 Debug.Log($"[GenerateBoardSafe] success after {attempt + 1} attempts");
                 break;
@@ -112,18 +112,18 @@ public class BoardManager : MonoBehaviour
     private void FallbackPlace(List<string> types)
     {
         List<Vector2Int> allCells = new List<Vector2Int>();
-        for (int x = 0; x < gridSize; x++)
-            for (int y = 0; y < gridSize; y++)
+        for (int x = 0; x < _gridSize; x++)
+            for (int y = 0; y < _gridSize; y++)
                 allCells.Add(new Vector2Int(x, y));
         Shuffle(allCells);
         int idx = 0;
-        tiles = new Tile[gridSize, gridSize];
+        _tiles = new Tile[_gridSize, _gridSize];
         for (int i = 0; i < types.Count; i++)
         {
             PlaceTile(allCells[idx++], types[i]);
             PlaceTile(allCells[idx++], types[i]);
         }
-        totalPairs = types.Count;
+        _totalPairs = types.Count;
     }
 
     /// <summary>
@@ -132,7 +132,7 @@ public class BoardManager : MonoBehaviour
     private void PlaceTilesFromPairs(List<PairPlacement> pairs)
     {
         // 盤面のタイル配列を初期化
-        tiles = new Tile[gridSize, gridSize];
+        _tiles = new Tile[_gridSize, _gridSize];
 
         for (int i = 0; i < pairs.Count; i++)
         {
@@ -148,14 +148,14 @@ public class BoardManager : MonoBehaviour
     private bool TryRouteAllPairs(List<PairPlacement> pairs)
     {
         // 全てのペアの両端を占有
-        bool[,] tileOccupied = new bool[gridSize, gridSize];
+        bool[,] tileOccupied = new bool[_gridSize, _gridSize];
         foreach (var p in pairs)
         {
             tileOccupied[p.a.x, p.a.y] = true;
             tileOccupied[p.b.x, p.b.y] = true;
         }
 
-        bool[,] occupiedPaths = new bool[gridSize, gridSize]; // 空
+        bool[,] occupiedPaths = new bool[_gridSize, _gridSize]; // 空
 
         // 難しいペアから処理した方が良い(最短距離が長いものから先に処理)
         var pairInfo = new List<PairWithDist>();
@@ -195,7 +195,7 @@ public class BoardManager : MonoBehaviour
         var p = pairs[idx];
 
         // 候補パスを列挙
-        var candidates = EnumeratePaths(p.a, p.b, tileOccupied, occupiedPaths, maxPathsPerPair, pathSlack);
+        var candidates = EnumeratePaths(p.a, p.b, tileOccupied, occupiedPaths, _maxPathsPerPair, _pathSlack);
 
         if (candidates == null || candidates.Count == 0)
         {
@@ -251,7 +251,7 @@ public class BoardManager : MonoBehaviour
         int maxLen = shortest + slack;
 
         List<List<Vector2Int>> results = new List<List<Vector2Int>>();
-        bool[,] visited = new bool[gridSize, gridSize];
+        bool[,] visited = new bool[_gridSize, _gridSize];
         List<Vector2Int> cur = new List<Vector2Int>();
         cur.Add(start);
         visited[start.x, start.y] = true;
@@ -282,7 +282,7 @@ public class BoardManager : MonoBehaviour
             foreach (var n in neighbors)
             {
                 if (results.Count >= maxPaths) break;
-                if (n.x < 0 || n.x >= gridSize || n.y < 0 || n.y >= gridSize) continue;
+                if (n.x < 0 || n.x >= _gridSize || n.y < 0 || n.y >= _gridSize) continue;
                 if (visited[n.x, n.y]) continue;
 
                 // 通行可能か判定
@@ -320,7 +320,7 @@ public class BoardManager : MonoBehaviour
     private int ShortestDistance(bool[,] tileOccupied, bool[,] occupiedPaths, Vector2Int start, Vector2Int end)
     {
         if (start == end) return 0;
-        bool[,] vis = new bool[gridSize, gridSize];
+        bool[,] vis = new bool[_gridSize, _gridSize];
         Queue<(Vector2Int pos, int dist)> q = new Queue<(Vector2Int, int)>();
         q.Enqueue((start, 0));
         vis[start.x, start.y] = true;
@@ -336,7 +336,7 @@ public class BoardManager : MonoBehaviour
             foreach (var d in dirs)
             {
                 Vector2Int n = pos + d;
-                if (n.x < 0 || n.x >= gridSize || n.y < 0 || n.y >= gridSize) continue;
+                if (n.x < 0 || n.x >= _gridSize || n.y < 0 || n.y >= _gridSize) continue;
                 if (vis[n.x, n.y]) continue;
 
                 if (n == end) return dist + 1;
@@ -358,14 +358,14 @@ public class BoardManager : MonoBehaviour
     /// <param name="type"> 2つのセルとその種類の盤面を配置 </param>
     private void PlaceTile(Vector2Int pos, string type)
     {
-        if (tilePrefab == null || gridParent == null) return;
+        if (_tilePrefab == null || _gridParent == null) return;
 
-        GameObject go = Instantiate(tilePrefab, gridParent);
+        GameObject go = Instantiate(_tilePrefab, _gridParent);
         RectTransform rt = go.GetComponent<RectTransform>();
-        if (rt != null && lineManager != null)
+        if (rt != null && _lineManager != null)
         {
             // LineManager のセル->anchoredPosition を使って位置合わせ
-            rt.anchoredPosition = lineManager.CellToAnchored(pos);
+            rt.anchoredPosition = _lineManager.CellToAnchored(pos);
             Vector2 cellSize = GetCellSize();
             rt.sizeDelta = cellSize;
         }
@@ -373,15 +373,15 @@ public class BoardManager : MonoBehaviour
         Tile tile = go.GetComponent<Tile>();
         if (tile != null)
         {
-            tile.Setup(pos.x, pos.y, type, gameManager);
-            tiles[pos.x, pos.y] = tile;
+            tile.Setup(pos.x, pos.y, type, _gameManager);
+            _tiles[pos.x, pos.y] = tile;
 
-            int idx = allTypes.IndexOf(type);
+            int idx = _allTypes.IndexOf(type);
             if (idx < 0) idx = 0;
-            if (typeColors != null && typeColors.Length > 0)
+            if (_typeColors != null && _typeColors.Length > 0)
             {
                 UnityEngine.UI.Image img = go.GetComponent<UnityEngine.UI.Image>();
-                if (img != null) img.color = typeColors[idx % typeColors.Length];
+                if (img != null) img.color = _typeColors[idx % _typeColors.Length];
             }
         }
     }
@@ -392,8 +392,8 @@ public class BoardManager : MonoBehaviour
     /// <returns> セル1つの幅と高さ(デフォルトは(40,40)) </returns>
     private Vector2 GetCellSize()
     {
-        if (gridParent == null) return new Vector2(40f, 40f);
-        return new Vector2(gridParent.rect.width / gridSize, gridParent.rect.height / gridSize);
+        if (_gridParent == null) return new Vector2(40f, 40f);
+        return new Vector2(_gridParent.rect.width / _gridSize, _gridParent.rect.height / _gridSize);
     }
 
     /// <summary>
@@ -404,7 +404,7 @@ public class BoardManager : MonoBehaviour
     {
         for (int i = 0; i < list.Count; i++)
         {
-            int j = rand.Next(i, list.Count);
+            int j = _rand.Next(i, list.Count);
             var tmp = list[i];
             list[i] = list[j];
             list[j] = tmp;
@@ -416,12 +416,12 @@ public class BoardManager : MonoBehaviour
     /// </summary>
     public void ResetLine()
     {
-        if (lineManager == null) return;
+        if (_lineManager == null) return;
 
-        lineManager.rows = gridSize;
-        lineManager.columns = gridSize;
-        lineManager.ClearAllLines();
-        lineManager.RecalcGrid();
+        _lineManager.rows = _gridSize;
+        _lineManager.columns = _gridSize;
+        _lineManager.ClearAllLines();
+        _lineManager.RecalcGrid();
     }
 
     /// <summary>
@@ -430,7 +430,7 @@ public class BoardManager : MonoBehaviour
     /// <returns></returns>
     public int GetTotalPairs()
     {
-        return totalPairs;
+        return _totalPairs;
     }
 
     /// <summary>
@@ -440,9 +440,9 @@ public class BoardManager : MonoBehaviour
     /// <returns></returns>
     public Tile TileAt(Vector2Int cell)
     {
-        if (tiles == null) return null;
-        if (cell.x < 0 || cell.x >= tiles.GetLength(0) ||
-            cell.y < 0 || cell.y >= tiles.GetLength(1)) return null;
-        return tiles[cell.x, cell.y];
+        if (_tiles == null) return null;
+        if (cell.x < 0 || cell.x >= _tiles.GetLength(0) ||
+            cell.y < 0 || cell.y >= _tiles.GetLength(1)) return null;
+        return _tiles[cell.x, cell.y];
     }
 }
