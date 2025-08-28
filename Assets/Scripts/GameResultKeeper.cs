@@ -49,7 +49,6 @@ public class GameResultKeeper : MonoBehaviour
         elapsed = Mathf.FloorToInt(Time.time - startTime);
         minutes = elapsed / MINUTES_PER_HOUR;
         seconds = elapsed % MINUTES_PER_HOUR;
-
         timeText = $"{minutes:00}:{seconds:00}";
 
         return timeText;
