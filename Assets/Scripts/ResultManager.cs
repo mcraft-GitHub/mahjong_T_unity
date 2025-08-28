@@ -28,10 +28,10 @@ public class ResultManager : MonoBehaviour
     /// </summary>
     private void SetFinalTimeText()
     {
-        if (GameResultKeeper.Instance == null) return;
+        if (GameResultKeeper._Instance == null) return;
 
         if (finalTimeText != null)
-            finalTimeText.text = GameResultKeeper.Instance.MakeResultTime();
+            finalTimeText.text = GameResultKeeper._Instance.MakeResultTime();
     }
 
     /// <summary>

@@ -206,7 +206,7 @@ public class GameManager : MonoBehaviour
         _uiManager.UpdateUI(_boardManager.GetTotalPairs(), _matchedPairs);
         if (_matchedPairs >= _boardManager.GetTotalPairs())
         {
-            GameResultKeeper.Instance.MakeResultTime();
+            GameResultKeeper._Instance.MakeResultTime();
             ChangeResultScene();
         }
     }
@@ -219,7 +219,7 @@ public class GameManager : MonoBehaviour
         _boardManager.ResetBoard();
 
         _matchedPairs = 0;
-        GameResultKeeper.Instance.StartTime();
+        GameResultKeeper._Instance.StartTime();
         _gameActive = true;
         _isDragging = false;
         _hoverPath.Clear();

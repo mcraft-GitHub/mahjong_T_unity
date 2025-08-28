@@ -21,7 +21,7 @@ public class UIManager : MonoBehaviour
     {
         while (gameActive)
         {
-            _timerText.text = GameResultKeeper.Instance.MakeResultTime();
+            _timerText.text = GameResultKeeper._Instance.MakeResultTime();
             yield return new WaitForSeconds(1f);
         }
     }
