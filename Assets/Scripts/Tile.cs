@@ -51,7 +51,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     /// <param name="col"> —ñ </param>
     /// <param name="type"> í—Ş </param>
     /// <param name="gameRef"> ƒQ[ƒ€–{‘Ì‚Ö‚ÌQÆ </param>
-    public void Setup(int row, int col, string type, /*JanChainGame*/GameManager gameRef)
+    public void Setup(int row, int col, string type, GameManager gameRef)
     {
         _row = row;
         _col = col;
