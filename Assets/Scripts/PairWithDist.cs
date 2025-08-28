@@ -5,7 +5,7 @@ using UnityEngine;
 /// </summary>
 public class PairWithDist
 {
-    public PairPlacement pair;
-    public int dist;
-    public PairWithDist(PairPlacement p, int d) { pair = p; dist = d; }
+    public PairPlacement _pair;
+    public int _dist;
+    public PairWithDist(PairPlacement p, int d) { _pair = p; _dist = d; }
 }
