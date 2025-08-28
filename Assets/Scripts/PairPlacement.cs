@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Pair”z—ñ ‚Ì î•ñ
+/// ãƒšã‚¢é…åˆ—æƒ…å ±
 /// </summary>
 public class PairPlacement
 {
