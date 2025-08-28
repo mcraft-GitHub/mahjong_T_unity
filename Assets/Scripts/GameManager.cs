@@ -234,7 +234,8 @@ public class GameManager : MonoBehaviour
         if (!_gameActive || tile == null || tile._isMatched) return;
 
         // ‘I‘ğ‚ğ‰ğœ‚µ‚Ä1‚Â‘I‘ğ
-        foreach (var t in selectedTiles) t.Deselect();
+        foreach (var t in selectedTiles)
+            t.Deselect();
         selectedTiles.Clear();
 
         selectedTiles.Add(tile);
