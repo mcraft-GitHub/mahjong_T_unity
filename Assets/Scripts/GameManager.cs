@@ -16,10 +16,12 @@ public class GameManager : MonoBehaviour
     private int _matchedPairs = 0;
     private bool _gameActive = false;
 
-    private readonly List<Vector2Int> _hoverPath = new(); // ドラッグ中の経路
+    // ドラッグ中の経路
+    private readonly List<Vector2Int> _hoverPath = new();
     private bool _isDragging = false;
     private Color _dragColor = new Color(0.2f, 0.9f, 1f, 1f);
-    private Color _fixedColor = new Color(0.15f, 0.8f, 0.2f, 1f); // 確定緑
+    // 確定緑
+    private Color _fixedColor = new Color(0.15f, 0.8f, 0.2f, 1f);
 
     private List<Tile> _selectedTiles = new();
     public int _selectedTilesCount => _selectedTiles.Count;
