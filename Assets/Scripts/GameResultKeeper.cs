@@ -5,49 +5,53 @@ using UnityEngine;
 /// </summary>
 public class GameResultKeeper : MonoBehaviour
 {
-    public static GameResultKeeper Instance 
+    public static GameResultKeeper _Instance 
     {
         get;
         private set;
     }
-    private const int MINUTES_PER_HOUR = 60;
+    private const int _MINUTES_PER_HOUR = 60;
 
-    private int elapsed = 0;
-    private int minutes = 0;
-    private int seconds = 0;
-    private float startTime;
+    private int _elapsed = 0;
+    private int _minutes = 0;
+    private int _seconds = 0;
+    private float _startTime;
+    private string _timeText;
 
     void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (_Instance != null && _Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
-        Instance = this;
+        _Instance = this;
         DontDestroyOnLoad(this);
 
         StartTime();
     }
 
     /// <summary>
-    /// 経過時間計算用 startTime の設定
+    /// 経過時間計算用 _startTime の設定
     /// </summary>
     public void StartTime()
     {
-        startTime = Time.time;
+        _startTime = Time.time;
     }
 
     /// <summary>
     /// 最終経過タイムの計算
     /// GameScene から ResultScene へ遷移する際に使用
     /// </summary>
-    public void MakeResultTime()
+    public string MakeResultTime()
     {
-        elapsed = Mathf.FloorToInt(Time.time - startTime);
-        minutes = elapsed / MINUTES_PER_HOUR;
-        seconds = elapsed % MINUTES_PER_HOUR;
+        _elapsed = Mathf.FloorToInt(Time.time - _startTime);
+        _minutes = _elapsed / _MINUTES_PER_HOUR;
+        _seconds = _elapsed % _MINUTES_PER_HOUR;
+        _timeText = $"{_minutes:00}:{_seconds:00}";
+
+        return _timeText;
     }
 
     /// <summary>
@@ -56,7 +60,7 @@ public class GameResultKeeper : MonoBehaviour
     /// <returns> 経過 分 </returns>
     public int GetMinutes()
     {
-        return minutes;
+        return _minutes;
     }
 
     /// <summary>
@@ -65,6 +69,6 @@ public class GameResultKeeper : MonoBehaviour
     /// <returns> 経過 秒 </returns>
     public int GetSeconds()
     {
-        return seconds;
+        return _seconds;
     }
 }
