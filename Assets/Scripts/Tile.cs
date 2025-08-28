@@ -9,24 +9,39 @@ using UnityEngine.EventSystems;
 /// </summary>
 public class Tile : MonoBehaviour, IPointerClickHandler
 {
-    public Vector2Int Cell;
-    public int Row { get; private set; }
-    public int Col { get; private set; }
-    public string Type { get; private set; }
-    public bool IsMatched { get; private set; } = false;
+    public int _row
+    {
+        get;
+        private set;
+    }
+    public int _col
+    {
+        get;
+        private set;
+    }
+    public string _type
+    {
+        get;
+        private set;
+    }
+    public bool _isMatched
+    {
+        get;
+        private set;
+    } = false;
 
-    private /*JanChainGame*/GameManager game;
-    private Image image;
-    private Color originalColor;
-    [SerializeField] private TMP_Text tileText;
+    private /*JanChainGame*/GameManager _game;
+    private Image _image;
+    private Color _originalColor;
+    [SerializeField] private TMP_Text _tileText;
 
     private void Awake()
     {
-        image = GetComponent<Image>();
-        if (image != null)
-            originalColor = image.color;
-        if (tileText == null)
-            tileText = GetComponentInChildren<TMP_Text>();
+        _image = GetComponent<Image>();
+        if (_image != null)
+            _originalColor = _image.color;
+        if (_tileText == null)
+            _tileText = GetComponentInChildren<TMP_Text>();
     }
 
     /// <summary>
@@ -38,15 +53,15 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     /// <param name="gameRef"> ゲーム本体への参照 </param>
     public void Setup(int row, int col, string type, /*JanChainGame*/GameManager gameRef)
     {
-        Row = row;
-        Col = col;
-        Type = type;
-        game = gameRef;
-        IsMatched = false;
-        if (tileText != null)
-            tileText.text = type;
-        if (image != null)
-            image.color = originalColor;
+        _row = row;
+        _col = col;
+        _type = type;
+        _game = gameRef;
+        _isMatched = false;
+        if (_tileText != null)
+            _tileText.text = type;
+        if (_image != null)
+            _image.color = _originalColor;
     }
 
     /// <summary>
@@ -54,8 +69,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     /// </summary>
     public void Select()
     {
-        if (image != null && !IsMatched)
-            image.color = Color.yellow;
+        if (_image != null && !_isMatched)
+            _image.color = Color.yellow;
     }
 
     /// <summary>
@@ -63,8 +78,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     /// </summary>
     public void Deselect()
     {
-        if (image != null && !IsMatched)
-            image.color = originalColor;
+        if (_image != null && !_isMatched)
+            _image.color = _originalColor;
     }
 
     /// <summary>
@@ -72,11 +87,11 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     /// </summary>
     public void Match()
     {
-        IsMatched = true;
-        if (image != null)
-            image.color = Color.gray;
-        if (tileText != null)
-            tileText.text = ""; // マッチ後は文字非表示
+        _isMatched = true;
+        if (_image != null)
+            _image.color = Color.gray;
+        if (_tileText != null)
+            _tileText.text = ""; // マッチ後は文字非表示
     }
 
     /// <summary>
@@ -85,17 +100,17 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     /// <param name="eventData"></param>
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (game == null) return;
+        if (_game == null) return;
         
         // 既に選択中のタイルがある場合は、選択タイルとのマッチ判定
-        if (game.SelectedTilesCount == 0)
+        if (_game.SelectedTilesCount == 0)
         {
-            game.OnTileClicked(this);
+            _game.OnTileClicked(this);
         }
         else
         {
             // タイルクリックではドラッグ開始として選択を更新する
-            game.OnTileClicked(this);
+            _game.OnTileClicked(this);
         }
     }
 }
