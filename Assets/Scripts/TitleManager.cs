@@ -7,12 +7,12 @@ using UnityEngine.UI;
 /// </summary>
 public class TitleManager : MonoBehaviour
 {
-    [SerializeField] private Button startButton;
+    [SerializeField] private Button _startButton;
 
     void Start()
     {
-        if (startButton != null)
-            startButton.onClick.AddListener(ChangeGameScene);
+        if (_startButton != null)
+            _startButton.onClick.AddListener(ChangeGameScene);
     }
 
     /// <summary>
