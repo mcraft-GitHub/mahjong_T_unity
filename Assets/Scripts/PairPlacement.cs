@@ -5,8 +5,8 @@ using UnityEngine;
 /// </summary>
 public class PairPlacement
 {
-    public Vector2Int a;
-    public Vector2Int b;
-    public string type;
-    public PairPlacement(Vector2Int a, Vector2Int b, string type) { this.a = a; this.b = b; this.type = type; }
+    public Vector2Int _pairPlacementA;
+    public Vector2Int _pairPlacementB;
+    public string _type;
+    public PairPlacement(Vector2Int a, Vector2Int b, string type) { this._pairPlacementA = a; this._pairPlacementB = b; this._type = type; }
 }
