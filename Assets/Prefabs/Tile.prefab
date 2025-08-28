@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: d181cd611b476f2489868eddb460020d, type: 2}
+  m_sharedMaterial: {fileID: -4718069611125115073, guid: d181cd611b476f2489868eddb460020d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -226,7 +226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e29a1d6bac3cf54d824f6071dabb2cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileText: {fileID: 0}
+  _tileText: {fileID: 0}
 --- !u!61 &4608639117483866344
 BoxCollider2D:
   m_ObjectHideFlags: 0

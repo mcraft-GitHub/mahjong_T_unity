@@ -24,7 +24,7 @@ public class BoardManager : MonoBehaviour
     private List<Tile> _selectedTiles = new();
     private int _totalPairs = 0;
 
-    private readonly List<string> _allTypes = new() { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
+    private readonly List<string> _allTypes = new() { "ìå", "êº", "ìÏ", "ñk", "Å@", "·¢", "íÜ" };
     private System.Random _rand = new System.Random();
     private int _maxPlacementAttempts = 800;
     private int _maxPathsPerPair = 40;
