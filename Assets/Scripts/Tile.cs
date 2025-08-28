@@ -103,7 +103,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         if (_game == null) return;
         
         // 既に選択中のタイルがある場合は、選択タイルとのマッチ判定
-        if (_game.SelectedTilesCount == 0)
+        if (_game._selectedTilesCount == 0)
         {
             _game.OnTileClicked(this);
         }

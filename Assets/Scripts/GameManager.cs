@@ -21,8 +21,8 @@ public class GameManager : MonoBehaviour
     private Color _dragColor = new Color(0.2f, 0.9f, 1f, 1f);
     private Color _fixedColor = new Color(0.15f, 0.8f, 0.2f, 1f); // 確定緑
 
-    private List<Tile> selectedTiles = new();
-    public int SelectedTilesCount => selectedTiles.Count;
+    private List<Tile> _selectedTiles = new();
+    public int _selectedTilesCount => _selectedTiles.Count;
 
     void Start()
     {
@@ -37,9 +37,9 @@ public class GameManager : MonoBehaviour
         if (!_gameActive || _lineManager == null) return;
 
         // タイルが1つだけ選択されている場合にドラッグ操作を許可
-        if (selectedTiles.Count == 1)
+        if (_selectedTiles.Count == 1)
         {
-            var startTile = selectedTiles[0];
+            var startTile = _selectedTiles[0];
             var startCell = new Vector2Int(startTile._row, startTile._col);
 
             // ドラッグ開始
@@ -169,7 +169,7 @@ public class GameManager : MonoBehaviour
         {
             ConfirmMatch(_hoverPath);
             _hoverPath.Clear();
-            selectedTiles.Clear();
+            _selectedTiles.Clear();
         }
         else
         {
@@ -234,11 +234,11 @@ public class GameManager : MonoBehaviour
         if (!_gameActive || tile == null || tile._isMatched) return;
 
         // 選択を解除して1つ選択
-        foreach (var t in selectedTiles)
+        foreach (var t in _selectedTiles)
             t.Deselect();
-        selectedTiles.Clear();
+        _selectedTiles.Clear();
 
-        selectedTiles.Add(tile);
+        _selectedTiles.Add(tile);
         tile.Select();
     }
 
