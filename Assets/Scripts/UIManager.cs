@@ -9,11 +9,10 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     [Header("UI Elements")]
-    [SerializeField] private TMP_Text pairsLeftText;
-    [SerializeField] private TMP_Text timerText;
-    [SerializeField] public Button restartButton;
+    [SerializeField] private TMP_Text _pairsLeftText;
+    [SerializeField] private TMP_Text _timerText;
+    [SerializeField] public Button _restartButton;
 
-    private int matchedPairs = 0;
 
     /// <summary>
     /// 経過時間の更新
@@ -22,7 +21,7 @@ public class UIManager : MonoBehaviour
     {
         while (gameActive)
         {
-            timerText.text = GameResultKeeper.Instance.MakeResultTime();
+            _timerText.text = GameResultKeeper.Instance.MakeResultTime();
             yield return new WaitForSeconds(1f);
         }
     }
@@ -30,8 +29,8 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// 残りペア数表示の更新
     /// </summary>
-    public void UpdateUI(int totalPairs)
+    public void UpdateUI(int totalPairs, int matchedPairs)
     {
-        if (pairsLeftText != null) pairsLeftText.text = (totalPairs - matchedPairs).ToString();
+        if (_pairsLeftText != null) _pairsLeftText.text = (totalPairs - matchedPairs).ToString();
     }
 }
