@@ -26,8 +26,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        if (_uiManager.restartButton != null)
-            _uiManager.restartButton.onClick.AddListener(StartNewGame);
+        if (_uiManager._restartButton != null)
+            _uiManager._restartButton.onClick.AddListener(StartNewGame);
 
         StartNewGame();
     }
@@ -40,7 +40,7 @@ public class GameManager : MonoBehaviour
         if (selectedTiles.Count == 1)
         {
             var startTile = selectedTiles[0];
-            var startCell = new Vector2Int(startTile.Row, startTile.Col);
+            var startCell = new Vector2Int(startTile._row, startTile._col);
 
             // ドラッグ開始
             if (!_isDragging && Input.GetMouseButtonDown(0))
@@ -104,12 +104,12 @@ public class GameManager : MonoBehaviour
 
         // タイルの存在判定
         Tile t = _boardManager.TileAt(cell);
-        bool isStart = (cell.x == startTile.Row && cell.y == startTile.Col);
+        bool isStart = (cell.x == startTile._row && cell.y == startTile._col);
 
         if (t != null && !isStart)
         {
             // マッチ候補 or ブロック
-            if (!t.IsMatched && t.Type == startTile.Type)
+            if (!t._isMatched && t._type == startTile._type)
             {
                 // 終点は可
                 _hoverPath.Add(cell);
@@ -160,7 +160,7 @@ public class GameManager : MonoBehaviour
         var endTile = _boardManager.TileAt(endCell);
 
         // 同種タイルなら確定
-        if (endTile != null && !endTile.IsMatched && endTile != startTile && endTile.Type == startTile.Type)
+        if (endTile != null && !endTile._isMatched && endTile != startTile && endTile._type == startTile._type)
         {
             ConfirmMatch(_hoverPath);
             _hoverPath.Clear();
@@ -185,8 +185,8 @@ public class GameManager : MonoBehaviour
         Tile first = _boardManager.TileAt(path[0]);
         Tile last = _boardManager.TileAt(path[path.Count - 1]);
         if (first == null || last == null) return;
-        if (first.IsMatched || last.IsMatched) return;
-        if (first.Type != last.Type) return;
+        if (first._isMatched || last._isMatched) return;
+        if (first._type != last._type) return;
 
         // タイル確定
         first.Match();
@@ -227,7 +227,7 @@ public class GameManager : MonoBehaviour
     /// <param name="tile"></param>
     public void OnTileClicked(Tile tile)
     {
-        if (!_gameActive || tile == null || tile.IsMatched) return;
+        if (!_gameActive || tile == null || tile._isMatched) return;
 
         // 選択を解除して1つ選択
         foreach (var t in selectedTiles) t.Deselect();
