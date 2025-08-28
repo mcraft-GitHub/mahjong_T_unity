@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// ペア配列 の 情報
+/// Pair配列 の 情報
 /// </summary>
 public class PairPlacement
 {
