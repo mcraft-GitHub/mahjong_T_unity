@@ -137,8 +137,8 @@ public class BoardManager : MonoBehaviour
         for (int i = 0; i < pairs.Count; i++)
         {
             var p = pairs[i];
-            PlaceTile(p.a, p.type);
-            PlaceTile(p.b, p.type);
+            PlaceTile(p._pairPlacementA, p._type);
+            PlaceTile(p._pairPlacementB, p._type);
         }
     }
 
@@ -151,8 +151,8 @@ public class BoardManager : MonoBehaviour
         bool[,] tileOccupied = new bool[_gridSize, _gridSize];
         foreach (var p in pairs)
         {
-            tileOccupied[p.a.x, p.a.y] = true;
-            tileOccupied[p.b.x, p.b.y] = true;
+            tileOccupied[p._pairPlacementA.x, p._pairPlacementA.y] = true;
+            tileOccupied[p._pairPlacementB.x, p._pairPlacementB.y] = true;
         }
 
         bool[,] occupiedPaths = new bool[_gridSize, _gridSize]; // 空
@@ -161,16 +161,16 @@ public class BoardManager : MonoBehaviour
         var pairInfo = new List<PairWithDist>();
         foreach (var p in pairs)
         {
-            int d = ShortestDistance(tileOccupied, occupiedPaths, p.a, p.b);
+            int d = ShortestDistance(tileOccupied, occupiedPaths, p._pairPlacementA, p._pairPlacementB);
             if (d < 0) d = int.MaxValue; // 到達不可
             pairInfo.Add(new PairWithDist(p, d));
         }
         // 長い距離(難しい)を先に
-        pairInfo.Sort((x, y) => y.dist.CompareTo(x.dist));
+        pairInfo.Sort((x, y) => y._dist.CompareTo(x._dist));
 
         // 作り直した順序の pairsOrdered を作る
         var pairsOrdered = new List<PairPlacement>();
-        foreach (var pw in pairInfo) pairsOrdered.Add(pw.pair);
+        foreach (var pw in pairInfo) pairsOrdered.Add(pw._pair);
 
         // 再帰でルーティング
         var chosenPaths = new List<List<Vector2Int>>(); // optional: store chosen paths
@@ -195,7 +195,7 @@ public class BoardManager : MonoBehaviour
         var p = pairs[idx];
 
         // 候補パスを列挙
-        var candidates = EnumeratePaths(p.a, p.b, tileOccupied, occupiedPaths, _maxPathsPerPair, _pathSlack);
+        var candidates = EnumeratePaths(p._pairPlacementA, p._pairPlacementB, tileOccupied, occupiedPaths, _maxPathsPerPair, _pathSlack);
 
         if (candidates == null || candidates.Count == 0)
         {
@@ -210,7 +210,7 @@ public class BoardManager : MonoBehaviour
             for (int k = 0; k < path.Count; k++)
             {
                 Vector2Int cell = path[k];
-                if (cell == p.a || cell == p.b) continue;
+                if (cell == p._pairPlacementA || cell == p._pairPlacementB) continue;
                 if (!occupiedPaths[cell.x, cell.y])
                 {
                     occupiedPaths[cell.x, cell.y] = true;
