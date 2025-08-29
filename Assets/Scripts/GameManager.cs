@@ -211,7 +211,7 @@ public class GameManager : MonoBehaviour
         if (_matchedPairs >= _boardManager.GetTotalPairs())
         {
             GameResultKeeper._Instance.MakeResultTime();
-            OnChangeResultScene();
+            BeginFadeToResultScene();
         }
     }
 
@@ -259,7 +259,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// フェードアウト ラッパー関数
     /// </summary>
-    private void OnChangeResultScene()
+    private void BeginFadeToResultScene()
     {
         StartCoroutine(ChangeResultScene());
     }
