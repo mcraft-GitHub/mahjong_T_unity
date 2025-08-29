@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 
 public class FadeControl : MonoBehaviour
 {
@@ -25,10 +26,18 @@ public class FadeControl : MonoBehaviour
     }
 
     /// <summary>
+    /// フェードイン ラッパー関数
+    /// </summary>
+    public void SceneStart()
+    {
+        StartCoroutine(FadeInScene());
+    }
+
+    /// <summary>
     /// フェードイン
     /// </summary>
     /// <returns></returns>
-    public IEnumerator FadeInScene()
+    private IEnumerator FadeInScene()
     {
         _isFade = true;
         float elapsed = 0f;
@@ -46,7 +55,7 @@ public class FadeControl : MonoBehaviour
     /// フェードアウト
     /// </summary>
     /// <returns></returns>
-    public IEnumerator FadeOutScene()
+    private IEnumerator FadeOutScene()
     {
         _isFade = true;
         float elapsed = 0f;
@@ -81,5 +90,22 @@ public class FadeControl : MonoBehaviour
         }
 
         _fadePanel.alpha = _blinkAlpha;
+    }
+
+    /// <summary>
+    /// ゲームシーン遷移とフェードアウト ラッパー関数
+    /// </summary>
+    public void BeginFadeToScene(string sceneName)
+    {
+        StartCoroutine(ChangeScene(sceneName));
+    }
+
+    /// <summary>
+    /// 他Scene へ シーン遷移
+    /// </summary>
+    private IEnumerator ChangeScene(string sceneName)
+    {
+        yield return StartCoroutine(FadeOutScene());
+        SceneManager.LoadScene(sceneName);
     }
 }
