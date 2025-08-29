@@ -11,19 +11,19 @@ public class ResultManager : MonoBehaviour
 {
     [SerializeField] private FadeControl _fadeControl;
 
-    [SerializeField] private TMP_Text finalTimeText;
+    [SerializeField] private TMP_Text _finalTimeText;
 
-    [SerializeField] private Button playAgainButton;
-    [SerializeField] private Button backToTitleButton;
+    [SerializeField] private Button _playAgainButton;
+    [SerializeField] private Button _backToTitleButton;
 
     void Start()
     {
         ResultSceneStart();
 
-        if (playAgainButton != null)
-            playAgainButton.onClick.AddListener(BeginFadeToGameScene);
-        if (backToTitleButton != null)
-            backToTitleButton.onClick.AddListener(BeginFadeToTitleScene);
+        if (_playAgainButton != null)
+            _playAgainButton.onClick.AddListener(BeginFadeToGameScene);
+        if (_backToTitleButton != null)
+            _backToTitleButton.onClick.AddListener(BeginFadeToTitleScene);
 
         SetFinalTimeText();
     }
@@ -35,8 +35,8 @@ public class ResultManager : MonoBehaviour
     {
         if (GameResultKeeper._Instance == null) return;
 
-        if (finalTimeText != null)
-            finalTimeText.text = GameResultKeeper._Instance.MakeResultTime();
+        if (_finalTimeText != null)
+            _finalTimeText.text = GameResultKeeper._Instance.MakeResultTime();
     }
 
     /// <summary>
