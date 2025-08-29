@@ -1253,9 +1253,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _fadeControl: {fileID: 297037574}
-  finalTimeText: {fileID: 136655451}
-  playAgainButton: {fileID: 1991924293}
-  backToTitleButton: {fileID: 22091087}
+  _finalTimeText: {fileID: 136655451}
+  _playAgainButton: {fileID: 1991924293}
+  _backToTitleButton: {fileID: 22091087}
 --- !u!1 &1893433785
 GameObject:
   m_ObjectHideFlags: 0
