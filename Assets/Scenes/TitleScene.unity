@@ -608,8 +608,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0}
-  m_RaycastTarget: 1
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -660,7 +660,7 @@ MonoBehaviour:
   _fadePanel: {fileID: 989122082}
   _isBlink: 1
   _blinkSpeed: 1
-  _maxBlinkAlpha: 0.5
+  _maxBlinkAlpha: 0.7
 --- !u!1 &1496006011
 GameObject:
   m_ObjectHideFlags: 0
@@ -842,6 +842,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 464778f928d724447883fccf06d7e6c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _fadeControl: {fileID: 989122083}
   _startButton: {fileID: 371835334}
 --- !u!1 &1893433785
 GameObject:
