@@ -33,4 +33,15 @@ public class UIManager : MonoBehaviour
     {
         if (_pairsLeftText != null) _pairsLeftText.text = (totalPairs - matchedPairs).ToString();
     }
+
+    /// <summary>
+    /// リスタートボタンを interactable の設定
+    /// </summary>
+    public void SetRestartButtonInteractable(bool isInteractable)
+    {
+        if (_restartButton != null)
+        {
+            _restartButton.interactable = isInteractable;
+        }
+    }
 }

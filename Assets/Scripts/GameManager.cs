@@ -210,6 +210,7 @@ public class GameManager : MonoBehaviour
         _uiManager.UpdateUI(_boardManager.GetTotalPairs(), _matchedPairs);
         if (_matchedPairs >= _boardManager.GetTotalPairs())
         {
+            _uiManager.SetRestartButtonInteractable(false);
             GameResultKeeper._Instance.MakeResultTime();
             _fadeControl.BeginFadeToScene("ResultScene");
         }
