@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -12,6 +13,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private BoardManager _boardManager;
     [SerializeField] private UIManager _uiManager;
     [SerializeField] private LineManager _lineManager;
+    [SerializeField] private FadeControl _fadeControl;
 
     private int _matchedPairs = 0;
     private bool _gameActive = false;
@@ -28,6 +30,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        GameSceneStart();
+
         if (_uiManager._restartButton != null)
             _uiManager._restartButton.onClick.AddListener(StartNewGame);
 
@@ -207,7 +211,7 @@ public class GameManager : MonoBehaviour
         if (_matchedPairs >= _boardManager.GetTotalPairs())
         {
             GameResultKeeper._Instance.MakeResultTime();
-            ChangeResultScene();
+            BeginFadeToResultScene();
         }
     }
 
@@ -245,10 +249,35 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
+    /// フェードイン ラッパー関数
+    /// </summary>
+    private void GameSceneStart()
+    {
+        StartCoroutine(GameFadeIn());
+    }
+
+    /// <summary>
+    /// フェードアウト ラッパー関数
+    /// </summary>
+    private void BeginFadeToResultScene()
+    {
+        StartCoroutine(ChangeResultScene());
+    }
+
+    /// <summary>
+    /// フェードイン
+    /// </summary>
+    private IEnumerator GameFadeIn()
+    {
+        yield return StartCoroutine(_fadeControl.FadeInScene());
+    }
+
+    /// <summary>
     /// ResultScene へ シーン遷移
     /// </summary>
-    void ChangeResultScene()
+    private IEnumerator ChangeResultScene()
     {
+        yield return StartCoroutine(_fadeControl.FadeOutScene());
         SceneManager.LoadScene("ResultScene");
     }
 }
