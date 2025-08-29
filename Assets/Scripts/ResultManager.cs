@@ -18,12 +18,12 @@ public class ResultManager : MonoBehaviour
 
     void Start()
     {
-        ResultSceneStart();
+        _fadeControl.SceneStart();
 
         if (_playAgainButton != null)
-            _playAgainButton.onClick.AddListener(BeginFadeToGameScene);
+            _playAgainButton.onClick.AddListener(() => _fadeControl.BeginFadeToScene("GameScene"));
         if (_backToTitleButton != null)
-            _backToTitleButton.onClick.AddListener(BeginFadeToTitleScene);
+            _backToTitleButton.onClick.AddListener(() => _fadeControl.BeginFadeToScene("TitleScene"));
 
         SetFinalTimeText();
     }
@@ -37,55 +37,5 @@ public class ResultManager : MonoBehaviour
 
         if (_finalTimeText != null)
             _finalTimeText.text = GameResultKeeper._Instance.MakeResultTime();
-    }
-
-    /// <summary>
-    /// フェードイン ラッパー関数
-    /// </summary>
-    private void ResultSceneStart()
-    {
-        StartCoroutine(ResultFadeIn());
-    }
-
-    /// <summary>
-    /// ゲームシーン遷移とフェードアウト ラッパー関数
-    /// </summary>
-    private void BeginFadeToGameScene()
-    {
-        StartCoroutine(ChangeGameScene());
-    }
-
-    /// <summary>
-    /// タイトルシーン遷移とフェードアウト ラッパー関数
-    /// </summary>
-    private void BeginFadeToTitleScene()
-    {
-        StartCoroutine(ChangeTitleScene());
-    }
-
-    /// <summary>
-    /// フェードイン
-    /// </summary>
-    private IEnumerator ResultFadeIn()
-    {
-        yield return StartCoroutine(_fadeControl.FadeInScene());
-    }
-
-    /// <summary>
-    /// GameScene へ シーン遷移
-    /// </summary>
-    private IEnumerator ChangeGameScene()
-    {
-        yield return StartCoroutine(_fadeControl.FadeOutScene());
-        SceneManager.LoadScene("GameScene");
-    }
-
-    /// <summary>
-    /// TitleScene へ シーン遷移
-    /// </summary>
-    private IEnumerator ChangeTitleScene()
-    {
-        yield return StartCoroutine(_fadeControl.FadeOutScene());
-        SceneManager.LoadScene("TitleScene");
     }
 }

@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        GameSceneStart();
+        _fadeControl.SceneStart();
 
         if (_uiManager._restartButton != null)
             _uiManager._restartButton.onClick.AddListener(StartNewGame);
@@ -211,7 +211,7 @@ public class GameManager : MonoBehaviour
         if (_matchedPairs >= _boardManager.GetTotalPairs())
         {
             GameResultKeeper._Instance.MakeResultTime();
-            BeginFadeToResultScene();
+            _fadeControl.BeginFadeToScene("ResultScene");
         }
     }
 
@@ -246,38 +246,5 @@ public class GameManager : MonoBehaviour
 
         _selectedTiles.Add(tile);
         tile.Select();
-    }
-
-    /// <summary>
-    /// フェードイン ラッパー関数
-    /// </summary>
-    private void GameSceneStart()
-    {
-        StartCoroutine(GameFadeIn());
-    }
-
-    /// <summary>
-    /// フェードアウト ラッパー関数
-    /// </summary>
-    private void BeginFadeToResultScene()
-    {
-        StartCoroutine(ChangeResultScene());
-    }
-
-    /// <summary>
-    /// フェードイン
-    /// </summary>
-    private IEnumerator GameFadeIn()
-    {
-        yield return StartCoroutine(_fadeControl.FadeInScene());
-    }
-
-    /// <summary>
-    /// ResultScene へ シーン遷移
-    /// </summary>
-    private IEnumerator ChangeResultScene()
-    {
-        yield return StartCoroutine(_fadeControl.FadeOutScene());
-        SceneManager.LoadScene("ResultScene");
     }
 }
