@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// UI ‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+/// UI ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class UIManager : MonoBehaviour
 {
@@ -15,7 +15,7 @@ public class UIManager : MonoBehaviour
 
 
     /// <summary>
-    /// Œo‰ßŠÔ‚ÌXV
+    /// çµŒéæ™‚é–“ã®æ›´æ–°
     /// </summary>
     public IEnumerator UpdateTimer(bool gameActive)
     {
@@ -27,10 +27,21 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// c‚èƒyƒA”•\¦‚ÌXV
+    /// æ®‹ã‚Šãƒšã‚¢æ•°è¡¨ç¤ºã®æ›´æ–°
     /// </summary>
     public void UpdateUI(int totalPairs, int matchedPairs)
     {
         if (_pairsLeftText != null) _pairsLeftText.text = (totalPairs - matchedPairs).ToString();
+    }
+
+    /// <summary>
+    /// ãƒªã‚¹ã‚¿ãƒ¼ãƒˆãƒœã‚¿ãƒ³ã‚’ interactable ã®è¨­å®š
+    /// </summary>
+    public void SetRestartButtonInteractable(bool isInteractable)
+    {
+        if (_restartButton != null)
+        {
+            _restartButton.interactable = isInteractable;
+        }
     }
 }
