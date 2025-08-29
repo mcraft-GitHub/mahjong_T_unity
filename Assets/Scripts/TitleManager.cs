@@ -14,23 +14,6 @@ public class TitleManager : MonoBehaviour
     void Start()
     {
         if (_startButton != null)
-            _startButton.onClick.AddListener(OnStartButtonClicked);
-    }
-
-    /// <summary>
-    /// ラッパー関数
-    /// </summary>
-    private void OnStartButtonClicked()
-    {
-        StartCoroutine(ChangeGameScene());
-    }
-
-    /// <summary>
-    /// GameScene へ シーン遷移
-    /// </summary>
-    private IEnumerator ChangeGameScene()
-    {
-        yield return StartCoroutine(_fadeControl.FadeOutScene());
-        SceneManager.LoadScene("GameScene");
+            _startButton.onClick.AddListener(() => _fadeControl.BeginFadeToScene("GameScene"));
     }
 }

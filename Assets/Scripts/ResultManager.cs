@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,17 +9,21 @@ using UnityEngine.UI;
 /// </summary>
 public class ResultManager : MonoBehaviour
 {
-    [SerializeField] private TMP_Text finalTimeText;
+    [SerializeField] private FadeControl _fadeControl;
 
-    [SerializeField] private Button playAgainButton;
-    [SerializeField] private Button backToTitleButton;
+    [SerializeField] private TMP_Text _finalTimeText;
+
+    [SerializeField] private Button _playAgainButton;
+    [SerializeField] private Button _backToTitleButton;
 
     void Start()
     {
-        if (playAgainButton != null)
-            playAgainButton.onClick.AddListener(ChangeGameScene);
-        if (backToTitleButton != null)
-            backToTitleButton.onClick.AddListener(ChangeTitleScene);
+        _fadeControl.SceneStart();
+
+        if (_playAgainButton != null)
+            _playAgainButton.onClick.AddListener(() => _fadeControl.BeginFadeToScene("GameScene"));
+        if (_backToTitleButton != null)
+            _backToTitleButton.onClick.AddListener(() => _fadeControl.BeginFadeToScene("TitleScene"));
 
         SetFinalTimeText();
     }
@@ -30,23 +35,7 @@ public class ResultManager : MonoBehaviour
     {
         if (GameResultKeeper._Instance == null) return;
 
-        if (finalTimeText != null)
-            finalTimeText.text = GameResultKeeper._Instance.MakeResultTime();
-    }
-
-    /// <summary>
-    /// GameScene へ シーン遷移
-    /// </summary>
-    private void ChangeGameScene()
-    {
-        SceneManager.LoadScene("GameScene");
-    }
-
-    /// <summary>
-    /// TitleScene へ シーン遷移
-    /// </summary>
-    private void ChangeTitleScene()
-    {
-        SceneManager.LoadScene("TitleScene");
+        if (_finalTimeText != null)
+            _finalTimeText.text = GameResultKeeper._Instance.MakeResultTime();
     }
 }
