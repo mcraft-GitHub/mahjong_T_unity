@@ -418,8 +418,8 @@ public class BoardManager : MonoBehaviour
     {
         if (_lineManager == null) return;
 
-        _lineManager.rows = _gridSize;
-        _lineManager.columns = _gridSize;
+        _lineManager._rows = _gridSize;
+        _lineManager._columns = _gridSize;
         _lineManager.ClearAllLines();
         _lineManager.RecalcGrid();
     }

@@ -10,30 +10,30 @@ public class LineManager : MonoBehaviour
 {
     [Header("Grid Settings")]
     // ゲーム盤面のパネル
-    [SerializeField] private RectTransform panel;
+    [SerializeField] private RectTransform _panel;
     // 線を格納する
-    [SerializeField] private RectTransform lineContainer;
+    [SerializeField] private RectTransform _lineContainer;
     // 行数
-    [SerializeField] public int rows = 8;
+    [SerializeField] public int _rows = 8;
     // 列数
-    [SerializeField] public int columns = 8;
+    [SerializeField] public int _columns = 8;
 
     [Header("Line Prefab")]
-    [SerializeField] private GameObject linePrefab;
+    [SerializeField] private GameObject _linePrefab;
 
     [Header("Style")]
     // 太さ
-    [SerializeField] private float lineThickness = 6f;
+    [SerializeField] private float _lineThickness = 6f;
 
     // 確定線の仮描画
-    private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> fixedLines = new();
-    private readonly HashSet<Vector2Int> fixedOccupiedCells = new();
+    private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _fixedLines = new();
+    private readonly HashSet<Vector2Int> _fixedOccupiedCells = new();
 
     // ドラッグ中の線
-    private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> hoverLines = new();
+    private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _hoverLines = new();
 
-    private float GridWidth => panel.rect.width;
-    private float GridHeight => panel.rect.height;
+    private float GridWidth => _panel.rect.width;
+    private float GridHeight => _panel.rect.height;
 
     /// <summary>
     /// セル座標をUI座標に変換
@@ -42,8 +42,8 @@ public class LineManager : MonoBehaviour
     /// <returns> セルの中心座標 </returns>
     public Vector2 CellToAnchored(Vector2Int cell)
     {
-        float cw = GridWidth / columns;
-        float ch = GridHeight / rows;
+        float cw = GridWidth / _columns;
+        float ch = GridHeight / _rows;
         float x = -GridWidth / 2f + cell.y * cw + cw / 2f;
         float y = GridHeight / 2f - cell.x * ch - ch / 2f;
         return new Vector2(x, y);
@@ -58,10 +58,10 @@ public class LineManager : MonoBehaviour
     public bool ScreenToCell(Vector3 screenPos, out Vector2Int cell)
     {
         Vector2 local;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(lineContainer, screenPos, null, out local);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(_lineContainer, screenPos, null, out local);
 
-        float cw = GridWidth / columns;
-        float ch = GridHeight / rows;
+        float cw = GridWidth / _columns;
+        float ch = GridHeight / _rows;
 
         int y = Mathf.FloorToInt((local.x + GridWidth / 2f) / cw);
         int x = Mathf.FloorToInt((GridHeight / 2f - local.y) / ch);
@@ -75,14 +75,14 @@ public class LineManager : MonoBehaviour
     /// </summary>
     /// <param name="c"> 判定するセル </param>
     /// <returns> 範囲内なら true </returns>
-    public bool Inside(Vector2Int c) => c.x >= 0 && c.x < rows && c.y >= 0 && c.y < columns;
+    public bool Inside(Vector2Int c) => c.x >= 0 && c.x < _rows && c.y >= 0 && c.y < _columns;
 
     /// <summary>
     /// 確定線セルの通行不可チェック
     /// </summary>
     /// <param name="cell"> セル座標 </param>
     /// <returns> 確定線があれば true </returns>
-    public bool HasFixedOnCell(Vector2Int cell) => fixedOccupiedCells.Contains(cell);
+    public bool HasFixedOnCell(Vector2Int cell) => _fixedOccupiedCells.Contains(cell);
 
     /// <summary>
     /// 2セル間に線を生成して配置
@@ -94,14 +94,14 @@ public class LineManager : MonoBehaviour
     /// <returns> 生成された線のオブジェクト </returns>
     private GameObject PlaceSegment(Vector2Int from, Vector2Int to, Color color, bool isHover)
     {
-        GameObject go = Instantiate(linePrefab, lineContainer);
+        GameObject go = Instantiate(_linePrefab, _lineContainer);
         RectTransform rt = go.GetComponent<RectTransform>();
 
         Vector2 p0 = CellToAnchored(from);
         Vector2 p1 = CellToAnchored(to);
 
         rt.anchoredPosition = (p0 + p1) * 0.5f;
-        rt.sizeDelta = new Vector2(Vector2.Distance(p0, p1), lineThickness);
+        rt.sizeDelta = new Vector2(Vector2.Distance(p0, p1), _lineThickness);
         float angle = Mathf.Atan2(p1.y - p0.y, p1.x - p0.x) * Mathf.Rad2Deg;
         rt.rotation = Quaternion.Euler(0, 0, angle);
 
@@ -111,9 +111,9 @@ public class LineManager : MonoBehaviour
 
         (Vector2Int, Vector2Int) key = (from, to);
         if (isHover)
-            hoverLines[key] = go;
+            _hoverLines[key] = go;
         else 
-            fixedLines[key] = go;
+            _fixedLines[key] = go;
         return go;
     }
 
@@ -137,9 +137,9 @@ public class LineManager : MonoBehaviour
     /// </summary>
     public void ClearHoverLines()
     {
-        foreach (var go in hoverLines.Values)
+        foreach (var go in _hoverLines.Values)
             Object.Destroy(go);
-        hoverLines.Clear();
+        _hoverLines.Clear();
     }
 
     /// <summary>
@@ -163,7 +163,7 @@ public class LineManager : MonoBehaviour
         }
         // 占有セルに追加
         foreach (var c in path)
-            fixedOccupiedCells.Add(c);
+            _fixedOccupiedCells.Add(c);
     }
 
     /// <summary>
@@ -171,13 +171,13 @@ public class LineManager : MonoBehaviour
     /// </summary>
     public void ClearAllLines()
     {
-        foreach (var go in fixedLines.Values)
+        foreach (var go in _fixedLines.Values)
             Object.Destroy(go);
-        foreach (var go in hoverLines.Values)
+        foreach (var go in _hoverLines.Values)
             Object.Destroy(go);
-        fixedLines.Clear();
-        hoverLines.Clear();
-        fixedOccupiedCells.Clear();
+        _fixedLines.Clear();
+        _hoverLines.Clear();
+        _fixedOccupiedCells.Clear();
     }
 
     /// <summary>
@@ -185,14 +185,14 @@ public class LineManager : MonoBehaviour
     /// </summary>
     public void RecalcGrid()
     {
-        foreach (var kv in fixedLines)
+        foreach (var kv in _fixedLines)
         {
             Vector2Int from = kv.Key.Item1;
             Vector2Int to = kv.Key.Item2;
             RectTransform rt = kv.Value.GetComponent<RectTransform>();
             UpdateSegmentTransform(rt, from, to);
         }
-        foreach (var kv in hoverLines)
+        foreach (var kv in _hoverLines)
         {
             Vector2Int from = kv.Key.Item1;
             Vector2Int to = kv.Key.Item2;
@@ -215,8 +215,8 @@ public class LineManager : MonoBehaviour
         // 中点に配置
         rt.anchoredPosition = (p0 + p1) * 0.5f;
 
-        // 長さをセル間距離に、太さを lineThickness に設定
-        rt.sizeDelta = new Vector2(Vector2.Distance(p0, p1), lineThickness);
+        // 長さをセル間距離に、太さを _lineThickness に設定
+        rt.sizeDelta = new Vector2(Vector2.Distance(p0, p1), _lineThickness);
 
         // from→to 方向の角度を計算して回転適用
         float angle = Mathf.Atan2(p1.y - p0.y, p1.x - p0.x) * Mathf.Rad2Deg;

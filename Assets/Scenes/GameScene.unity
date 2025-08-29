@@ -1207,12 +1207,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e7ca43a59848eb4b8d70190b9ae193b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panel: {fileID: 1970477287}
-  lineContainer: {fileID: 1571758215}
-  rows: 8
-  columns: 8
-  linePrefab: {fileID: 2204818720445425358, guid: 34ff835fdaed7c94e8903d1c478ba3cc, type: 3}
-  lineThickness: 6
+  _panel: {fileID: 1970477287}
+  _lineContainer: {fileID: 1571758215}
+  _rows: 8
+  _columns: 8
+  _linePrefab: {fileID: 2204818720445425358, guid: 34ff835fdaed7c94e8903d1c478ba3cc, type: 3}
+  _lineThickness: 6
 --- !u!4 &1387323521
 Transform:
   m_ObjectHideFlags: 0
