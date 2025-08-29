@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,6 +9,8 @@ using UnityEngine.UI;
 /// </summary>
 public class ResultManager : MonoBehaviour
 {
+    [SerializeField] private FadeControl _fadeControl;
+
     [SerializeField] private TMP_Text finalTimeText;
 
     [SerializeField] private Button playAgainButton;
@@ -15,10 +18,12 @@ public class ResultManager : MonoBehaviour
 
     void Start()
     {
+        ResultSceneStart();
+
         if (playAgainButton != null)
-            playAgainButton.onClick.AddListener(ChangeGameScene);
+            playAgainButton.onClick.AddListener(BeginFadeToGameScene);
         if (backToTitleButton != null)
-            backToTitleButton.onClick.AddListener(ChangeTitleScene);
+            backToTitleButton.onClick.AddListener(BeginFadeToTitleScene);
 
         SetFinalTimeText();
     }
@@ -35,18 +40,52 @@ public class ResultManager : MonoBehaviour
     }
 
     /// <summary>
+    /// フェードイン ラッパー関数
+    /// </summary>
+    private void ResultSceneStart()
+    {
+        StartCoroutine(ResultFadeIn());
+    }
+
+    /// <summary>
+    /// ゲームシーン遷移とフェードアウト ラッパー関数
+    /// </summary>
+    private void BeginFadeToGameScene()
+    {
+        StartCoroutine(ChangeGameScene());
+    }
+
+    /// <summary>
+    /// タイトルシーン遷移とフェードアウト ラッパー関数
+    /// </summary>
+    private void BeginFadeToTitleScene()
+    {
+        StartCoroutine(ChangeTitleScene());
+    }
+
+    /// <summary>
+    /// フェードイン
+    /// </summary>
+    private IEnumerator ResultFadeIn()
+    {
+        yield return StartCoroutine(_fadeControl.FadeInScene());
+    }
+
+    /// <summary>
     /// GameScene へ シーン遷移
     /// </summary>
-    private void ChangeGameScene()
+    private IEnumerator ChangeGameScene()
     {
+        yield return StartCoroutine(_fadeControl.FadeOutScene());
         SceneManager.LoadScene("GameScene");
     }
 
     /// <summary>
     /// TitleScene へ シーン遷移
     /// </summary>
-    private void ChangeTitleScene()
+    private IEnumerator ChangeTitleScene()
     {
+        yield return StartCoroutine(_fadeControl.FadeOutScene());
         SceneManager.LoadScene("TitleScene");
     }
 }
