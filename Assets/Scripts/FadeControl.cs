@@ -93,7 +93,7 @@ public class FadeControl : MonoBehaviour
     }
 
     /// <summary>
-    /// ゲームシーン遷移とフェードアウト ラッパー関数
+    /// シーン遷移とフェードアウト ラッパー関数
     /// </summary>
     public void BeginFadeToScene(string sceneName)
     {
