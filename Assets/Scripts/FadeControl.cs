@@ -1,8 +1,10 @@
 using UnityEngine;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// フェードイン・フェードアウトを制御するクラス
+/// </summary>
 public class FadeControl : MonoBehaviour
 {
     [SerializeField] private CanvasGroup _fadePanel;

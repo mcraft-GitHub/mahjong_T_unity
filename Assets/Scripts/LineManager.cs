@@ -1,131 +1,84 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
 /// 盤面に描画される線を管理するクラス
 /// </summary>
-
 public class LineManager : MonoBehaviour
 {
     [Header("Grid Settings")]
-    // ゲーム盤面のパネル
-    [SerializeField] private RectTransform _panel;
-    // 線を格納する
-    [SerializeField] private RectTransform _lineContainer;
-    // 行数
-    [SerializeField] public int _rows = 8;
-    // 列数
-    [SerializeField] public int _columns = 8;
+    [SerializeField] public int _gridSize = 8;
+    [SerializeField] private float _cellSpacing = 1.1f;
+    [SerializeField] private Transform _lineContainer;
 
     [Header("Line Prefab")]
     [SerializeField] private GameObject _linePrefab;
+    [SerializeField] private float _lineThickness = 0.1f;
 
-    [Header("Style")]
-    // 太さ
-    [SerializeField] private float _lineThickness = 6f;
+    // 行・列
+    public int _rows = 8;
+    public int _columns = 8;
 
-    // 確定線の仮描画
+    // 固定線とHover線を管理
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _fixedLines = new();
     private readonly HashSet<Vector2Int> _fixedOccupiedCells = new();
-
-    // ドラッグ中の線
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _hoverLines = new();
 
-    private float GridWidth => _panel.rect.width;
-    private float GridHeight => _panel.rect.height;
-
     /// <summary>
-    /// セル座標をUI座標に変換
+    /// セル座標 → ワールド座標
     /// </summary>
-    /// <param name="cell"> 列,行のセル座標 </param>
-    /// <returns> セルの中心座標 </returns>
-    public Vector2 CellToAnchored(Vector2Int cell)
+    public Vector3 CellToWorld(Vector2Int cell)
     {
-        float cw = GridWidth / _columns;
-        float ch = GridHeight / _rows;
-        float x = -GridWidth / 2f + cell.y * cw + cw / 2f;
-        float y = GridHeight / 2f - cell.x * ch - ch / 2f;
-        return new Vector2(x, y);
+        float halfGrid = (_gridSize - 1) * 0.5f;
+        float x = (cell.x - halfGrid) * _cellSpacing;
+        float y = (cell.y - halfGrid) * _cellSpacing;
+        return new Vector3(x, y, 0f);
     }
 
     /// <summary>
-    /// 画面座標をセル座標に変換
+    /// スクリーン座標 → セル座標
     /// </summary>
-    /// <param name="screenPos"> スクリーン座標 </param>
-    /// <param name="cell"> 変換後のセル座標 </param>
-    /// <returns> 盤面内かどうか </returns>
     public bool ScreenToCell(Vector3 screenPos, out Vector2Int cell)
     {
-        Vector2 local;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(_lineContainer, screenPos, null, out local);
+        Plane plane = new Plane(Vector3.forward, Vector3.zero);
+        Ray ray = Camera.main.ScreenPointToRay(screenPos);
+        if (plane.Raycast(ray, out float enter))
+        {
+            Vector3 worldPos = ray.GetPoint(enter);
+            int x = Mathf.RoundToInt(worldPos.x / _cellSpacing + (_gridSize - 1) * 0.5f);
+            int y = Mathf.RoundToInt(worldPos.y / _cellSpacing + (_gridSize - 1) * 0.5f);
+            cell = new Vector2Int(x, y);
+            return Inside(cell);
+        }
 
-        float cw = GridWidth / _columns;
-        float ch = GridHeight / _rows;
-
-        int y = Mathf.FloorToInt((local.x + GridWidth / 2f) / cw);
-        int x = Mathf.FloorToInt((GridHeight / 2f - local.y) / ch);
-
-        cell = new Vector2Int(x, y);
-        return Inside(cell);
+        cell = Vector2Int.zero;
+        return false;
     }
 
     /// <summary>
-    /// セルが盤面内かどうか
+    /// 盤面内かどうか
     /// </summary>
-    /// <param name="c"> 判定するセル </param>
-    /// <returns> 範囲内なら true </returns>
-    public bool Inside(Vector2Int c) => c.x >= 0 && c.x < _rows && c.y >= 0 && c.y < _columns;
-
-    /// <summary>
-    /// 確定線セルの通行不可チェック
-    /// </summary>
-    /// <param name="cell"> セル座標 </param>
-    /// <returns> 確定線があれば true </returns>
-    public bool HasFixedOnCell(Vector2Int cell) => _fixedOccupiedCells.Contains(cell);
-
-    /// <summary>
-    /// 2セル間に線を生成して配置
-    /// </summary>
-    /// <param name="from"> 開始セル </param>
-    /// <param name="to"> 終点セル </param>
-    /// <param name="color"> 線の色 </param>
-    /// <param name="isHover"> ドラック中なら true </param>
-    /// <returns> 生成された線のオブジェクト </returns>
-    private GameObject PlaceSegment(Vector2Int from, Vector2Int to, Color color, bool isHover)
+    public bool Inside(Vector2Int c)
     {
-        GameObject go = Instantiate(_linePrefab, _lineContainer);
-        RectTransform rt = go.GetComponent<RectTransform>();
-
-        Vector2 p0 = CellToAnchored(from);
-        Vector2 p1 = CellToAnchored(to);
-
-        rt.anchoredPosition = (p0 + p1) * 0.5f;
-        rt.sizeDelta = new Vector2(Vector2.Distance(p0, p1), _lineThickness);
-        float angle = Mathf.Atan2(p1.y - p0.y, p1.x - p0.x) * Mathf.Rad2Deg;
-        rt.rotation = Quaternion.Euler(0, 0, angle);
-
-        Image img = go.GetComponent<Image>();
-        if (img)
-            img.color = color;
-
-        (Vector2Int, Vector2Int) key = (from, to);
-        if (isHover)
-            _hoverLines[key] = go;
-        else 
-            _fixedLines[key] = go;
-        return go;
+        return c.x >= 0 && c.x < _gridSize && c.y >= 0 && c.y < _gridSize;
     }
 
     /// <summary>
-    /// ドラッグ中の経路を描画
+    /// 確定線がそのセルにあるか
     /// </summary>
-    /// <param name="path"> 経路のセルの列 </param>
-    /// <param name="color"> 線の色 </param>
+    public bool HasFixedOnCell(Vector2Int cell)
+    {
+        return _fixedOccupiedCells.Contains(cell);
+    }
+
+    /// <summary>
+    /// Hover線を描画
+    /// </summary>
     public void DrawHoverPath(List<Vector2Int> path, Color color)
     {
         ClearHoverLines();
         if (path == null || path.Count < 2) return;
+
         for (int i = 0; i < path.Count - 1; i++)
         {
             PlaceSegment(path[i], path[i + 1], color, true);
@@ -133,37 +86,36 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ドラッグ中の仮線を全削除
+    /// Hover線を全消去
     /// </summary>
     public void ClearHoverLines()
     {
         foreach (var go in _hoverLines.Values)
-            Object.Destroy(go);
+            Destroy(go);
         _hoverLines.Clear();
     }
 
     /// <summary>
-    /// 線の確定化
+    /// Hover線を確定線に昇格
     /// </summary>
-    /// <param name="path"> 確定させる経路 </param>
-    /// <param name="fixedColor"> 確定線の色 </param>
-    public void CommitHoverPath(List<Vector2Int> path, Color fixedColor)
+    public void CommitHoverPath(List<Vector2Int> path, Color color)
     {
-        if (path == null || path.Count < 2) 
+        if (path == null || path.Count < 2)
         {
             ClearHoverLines();
             return;
         }
 
-        // 既存線を消して、固定線として再描画
         ClearHoverLines();
         for (int i = 0; i < path.Count - 1; i++)
         {
-            PlaceSegment(path[i], path[i + 1], fixedColor, false);
+            PlaceSegment(path[i], path[i + 1], color, false);
         }
-        // 占有セルに追加
+
         foreach (var c in path)
+        {
             _fixedOccupiedCells.Add(c);
+        }
     }
 
     /// <summary>
@@ -172,16 +124,16 @@ public class LineManager : MonoBehaviour
     public void ClearAllLines()
     {
         foreach (var go in _fixedLines.Values)
-            Object.Destroy(go);
+            Destroy(go);
         foreach (var go in _hoverLines.Values)
-            Object.Destroy(go);
+            Destroy(go);
         _fixedLines.Clear();
         _hoverLines.Clear();
         _fixedOccupiedCells.Clear();
     }
 
     /// <summary>
-    /// 盤面サイズ変更時などの再レイアウト
+    /// Grid再計算時に全線を再配置
     /// </summary>
     public void RecalcGrid()
     {
@@ -189,37 +141,56 @@ public class LineManager : MonoBehaviour
         {
             Vector2Int from = kv.Key.Item1;
             Vector2Int to = kv.Key.Item2;
-            RectTransform rt = kv.Value.GetComponent<RectTransform>();
-            UpdateSegmentTransform(rt, from, to);
+            UpdateSegmentTransform(kv.Value.transform, from, to);
         }
         foreach (var kv in _hoverLines)
         {
             Vector2Int from = kv.Key.Item1;
             Vector2Int to = kv.Key.Item2;
-            RectTransform rt = kv.Value.GetComponent<RectTransform>();
-            UpdateSegmentTransform(rt, from, to);
+            UpdateSegmentTransform(kv.Value.transform, from, to);
         }
     }
 
     /// <summary>
-    /// RectTransform の線オブジェクトを fromカラオケto のセル間に合わせて変形
+    /// 線オブジェクトを生成
     /// </summary>
-    /// <param name="rt"> 線オブジェクトの RectTransform </param>
-    /// <param name="from"> 開始セル </param>
-    /// <param name="to"> 終点セル </param>
-    private void UpdateSegmentTransform(RectTransform rt, Vector2Int from, Vector2Int to)
+    private GameObject PlaceSegment(Vector2Int from, Vector2Int to, Color color, bool isHover)
     {
-        Vector2 p0 = CellToAnchored(from);
-        Vector2 p1 = CellToAnchored(to);
+        GameObject go = Instantiate(_linePrefab, _lineContainer);
 
-        // 中点に配置
-        rt.anchoredPosition = (p0 + p1) * 0.5f;
+        Vector3 p0 = CellToWorld(from);
+        Vector3 p1 = CellToWorld(to);
 
-        // 長さをセル間距離に、太さを _lineThickness に設定
-        rt.sizeDelta = new Vector2(Vector2.Distance(p0, p1), _lineThickness);
+        UpdateSegmentTransform(go.transform, from, to);
 
-        // from→to 方向の角度を計算して回転適用
-        float angle = Mathf.Atan2(p1.y - p0.y, p1.x - p0.x) * Mathf.Rad2Deg;
-        rt.rotation = Quaternion.Euler(0, 0, angle);
+        if (go.TryGetComponent<Renderer>(out var renderer))
+            renderer.material.color = color;
+
+        if (isHover)
+            _hoverLines[(from, to)] = go;
+        else
+            _fixedLines[(from, to)] = go;
+
+        return go;
+    }
+
+    /// <summary>
+    /// 線のTransformを from→to のセルに合わせて調整
+    /// </summary>
+    private void UpdateSegmentTransform(Transform tr, Vector2Int from, Vector2Int to)
+    {
+        Vector3 p0 = CellToWorld(from);
+        Vector3 p1 = CellToWorld(to);
+        Vector3 mid = (p0 + p1) * 0.5f;
+
+        tr.position = mid;
+        Vector3 dir = (p1 - p0).normalized;
+
+        // 回転
+        tr.rotation = Quaternion.FromToRotation(Vector3.right, dir) * Quaternion.Euler(0f, 0f, 90f);
+
+        float length = Vector3.Distance(p0, p1);
+        float thinness = 0.5f;
+        tr.localScale = new Vector3(length * thinness, _lineThickness, _lineThickness * thinness * thinness);
     }
 }
