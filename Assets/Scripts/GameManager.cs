@@ -21,9 +21,9 @@ public class GameManager : MonoBehaviour
     // ドラッグ中の経路
     private readonly List<Vector2Int> _hoverPath = new();
     private bool _isDragging = false;
-    private Color _dragColor = new Color(0.2f, 0.9f, 1f, 1f);
-    // 確定緑
-    private Color _fixedColor = new Color(0.15f, 0.8f, 0.2f, 1f);
+    private Color _dragColor = new Color(0.2f, 2.0f, 1f, 1f);
+    // 確定(赤)
+    private Color _fixedColor = new Color(2.0f, 0.0f, 0.0f, 1f);
 
     private List<Tile> _selectedTiles = new();
     public int _selectedTilesCount => _selectedTiles.Count;
