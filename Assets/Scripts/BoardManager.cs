@@ -1,8 +1,8 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ”Õã ‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+/// ç›¤ä¸Š ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class BoardManager : MonoBehaviour
 {
@@ -23,12 +23,12 @@ public class BoardManager : MonoBehaviour
     private int _totalPairs = 0;
 
     private System.Random _rand = new System.Random();
-    private int _maxPathsPerPair = 40;
-    private int _maxPlacementAttempts = 800;
-    private int _pathSlack = 6;
+    private readonly int _maxPathsPerPair = 40;
+    private readonly int _maxPlacementAttempts = 800;
+    private readonly int _pathSlack = 6;
 
     /// <summary>
-    /// ƒQ[ƒ€‚Ì”Õ–Ê‚ğƒŠƒZƒbƒg
+    /// ã‚²ãƒ¼ãƒ ã®ç›¤é¢ã‚’ãƒªã‚»ãƒƒãƒˆ
     /// </summary>
     public void ResetBoard()
     {
@@ -51,14 +51,14 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒ‰ƒ“ƒ_ƒ€”z’u
+    /// ãƒ©ãƒ³ãƒ€ãƒ é…ç½®
     /// </summary>
     private void GenerateBoardSafe()
     {
-        // Œˆ’è‚·‚éí—Ş”
+        // æ±ºå®šã™ã‚‹ç¨®é¡æ•°
         int typeCount = Mathf.Min(_maxTileTypes, _tilePrefabs.Count);
 
-        // g—p‚·‚éƒvƒŒƒnƒu‚ğƒVƒƒƒbƒtƒ‹‚µ‚ÄAƒyƒA‚²‚Æ‚É‘I‘ğ
+        // ä½¿ç”¨ã™ã‚‹ãƒ—ãƒ¬ãƒãƒ–ã‚’ã‚·ãƒ£ãƒƒãƒ•ãƒ«ã—ã¦ã€ãƒšã‚¢ã”ã¨ã«é¸æŠ
         List<GameObject> prefabPool = new List<GameObject>(_tilePrefabs);
         Shuffle(prefabPool);
         prefabPool = prefabPool.GetRange(0, typeCount);
@@ -66,7 +66,7 @@ public class BoardManager : MonoBehaviour
         bool success = false;
         for (int attempt = 0; attempt < _maxPlacementAttempts; attempt++)
         {
-            // ”Õ–ÊƒZƒ‹ƒŠƒXƒg
+            // ç›¤é¢ã‚»ãƒ«ãƒªã‚¹ãƒˆ
             List<Vector2Int> allCells = new List<Vector2Int>();
             for (int x = 0; x < _gridSize; x++)
                 for (int y = 0; y < _gridSize; y++)
@@ -75,7 +75,7 @@ public class BoardManager : MonoBehaviour
 
             List<Vector2Int> chosen = allCells.GetRange(0, typeCount * 2);
 
-            // ƒ‰ƒ“ƒ_ƒ€‚ÉƒyƒA‚É‚·‚é
+            // ãƒ©ãƒ³ãƒ€ãƒ ã«ãƒšã‚¢ã«ã™ã‚‹
             Shuffle(chosen);
             List<PairPlacement> pairs = new List<PairPlacement>();
             for (int i = 0; i < typeCount; i++)
@@ -85,10 +85,10 @@ public class BoardManager : MonoBehaviour
                 pairs.Add(new PairPlacement(a, b, $"Tile{i}"));
             }
 
-            // ‘SƒyƒA‚ğd•¡‚µ‚È‚¢ƒpƒX‚ÅŒq‚°‚é‚©
+            // å…¨ãƒšã‚¢ã‚’é‡è¤‡ã—ãªã„ãƒ‘ã‚¹ã§ç¹‹ã’ã‚‹ã‹
             if (TryRouteAllPairs(pairs))
             {
-                // ¬Œ÷FUI ‚É”½‰f‚µ‚ÄŠ®—¹
+                // æˆåŠŸï¼šUI ã«åæ˜ ã—ã¦å®Œäº†
                 PlaceTilesFromPairs(pairs, prefabPool);
                 _totalPairs = typeCount;
                 success = true;
@@ -103,7 +103,7 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Œo˜H‚ğ–³‹‚µ‚Äƒ‰ƒ“ƒ_ƒ€‚ÉƒyƒA‚ğ”z’u‚·‚éƒtƒH[ƒ‹ƒoƒbƒNˆ—
+    /// çµŒè·¯ã‚’ç„¡è¦–ã—ã¦ãƒ©ãƒ³ãƒ€ãƒ ã«ãƒšã‚¢ã‚’é…ç½®ã™ã‚‹ãƒ•ã‚©ãƒ¼ãƒ«ãƒãƒƒã‚¯å‡¦ç†
     /// </summary>
     private void FallbackPlace(List<GameObject> types)
     {
@@ -123,11 +123,11 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒyƒAƒŠƒXƒg ‚ğ UI ‚É”½‰f
+    /// ãƒšã‚¢ãƒªã‚¹ãƒˆ ã‚’ UI ã«åæ˜ 
     /// </summary>
     private void PlaceTilesFromPairs(List<PairPlacement> pairs, List<GameObject> types)
     {
-        // ”Õ–Ê‚Ìƒ^ƒCƒ‹”z—ñ‚ğ‰Šú‰»
+        // ç›¤é¢ã®ã‚¿ã‚¤ãƒ«é…åˆ—ã‚’åˆæœŸåŒ–
         _tiles = new Tile[_gridSize, _gridSize];
 
         for (int i = 0; i < pairs.Count; i++)
@@ -140,11 +140,11 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ‚¨Œİ‚¢‚ÉŠ±Â‚µ‚È‚¢Œo˜H‚ÅŒq‚°‚é‚©
+    /// ãŠäº’ã„ã«å¹²æ¸‰ã—ãªã„çµŒè·¯ã§ç¹‹ã’ã‚‹ã‹
     /// </summary>
     private bool TryRouteAllPairs(List<PairPlacement> pairs)
     {
-        // ‘S‚Ä‚ÌƒyƒA‚Ì—¼’[‚ğè—L
+        // å…¨ã¦ã®ãƒšã‚¢ã®ä¸¡ç«¯ã‚’å æœ‰
         bool[,] tileOccupied = new bool[_gridSize, _gridSize];
         foreach (var p in pairs)
         {
@@ -152,33 +152,33 @@ public class BoardManager : MonoBehaviour
             tileOccupied[p._pairPlacementB.x, p._pairPlacementB.y] = true;
         }
 
-        bool[,] occupiedPaths = new bool[_gridSize, _gridSize]; // ‹ó
+        bool[,] occupiedPaths = new bool[_gridSize, _gridSize]; // ç©º
 
-        // “ï‚µ‚¢ƒyƒA‚©‚çˆ—‚µ‚½•û‚ª—Ç‚¢(Å’Z‹——£‚ª’·‚¢‚à‚Ì‚©‚çæ‚Éˆ—)
+        // é›£ã—ã„ãƒšã‚¢ã‹ã‚‰å‡¦ç†ã—ãŸæ–¹ãŒè‰¯ã„(æœ€çŸ­è·é›¢ãŒé•·ã„ã‚‚ã®ã‹ã‚‰å…ˆã«å‡¦ç†)
         var pairInfo = new List<PairWithDist>();
         foreach (var p in pairs)
         {
             int d = ShortestDistance(tileOccupied, occupiedPaths, p._pairPlacementA, p._pairPlacementB);
             
-            // “’B•s‰Â
+            // åˆ°é”ä¸å¯
             if (d < 0) d = int.MaxValue;
             pairInfo.Add(new PairWithDist(p, d));
         }
-        // ’·‚¢‹——£(“ï‚µ‚¢)‚ğæ‚É
+        // é•·ã„è·é›¢(é›£ã—ã„)ã‚’å…ˆã«
         pairInfo.Sort((x, y) => y._dist.CompareTo(x._dist));
 
-        // ì‚è’¼‚µ‚½‡˜‚Ì pairsOrdered ‚ğì‚é
+        // ä½œã‚Šç›´ã—ãŸé †åºã® pairsOrdered ã‚’ä½œã‚‹
         var pairsOrdered = new List<PairPlacement>();
         foreach (var pw in pairInfo) pairsOrdered.Add(pw._pair);
 
-        // Ä‹A‚Åƒ‹[ƒeƒBƒ“ƒO
+        // å†å¸°ã§ãƒ«ãƒ¼ãƒ†ã‚£ãƒ³ã‚°
         var chosenPaths = new List<List<Vector2Int>>(); // optional: store chosen paths
         bool ok = RoutePairsRecursive(pairsOrdered, 0, tileOccupied, occupiedPaths, chosenPaths);
         return ok;
     }
 
     /// <summary>
-    /// Ä‹A“I‚ÉƒyƒA‚ÌŒo˜H‚ğ’Tõ‚µ‚Ä‘S‚Ä‚Â‚È‚°‚é
+    /// å†å¸°çš„ã«ãƒšã‚¢ã®çµŒè·¯ã‚’æ¢ç´¢ã—ã¦å…¨ã¦ã¤ãªã’ã‚‹
     /// </summary>
     /// <param name="pairs"></param>
     /// <param name="idx"></param>
@@ -220,14 +220,14 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒyƒA‚Ì n“_‚©‚çI“_‚Ü‚Å‚ÌŒo˜H‚ğDFS‚Å—ñ‹“
+    /// ãƒšã‚¢ã® å§‹ç‚¹ã‹ã‚‰çµ‚ç‚¹ã¾ã§ã®çµŒè·¯ã‚’DFSã§åˆ—æŒ™
     /// </summary>
-    /// <param name="start"> ŠJnƒZƒ‹ </param>
-    /// <param name="end"> I“_ƒZƒ‹ </param>
-    /// <param name="tileOccupied"> ƒ^ƒCƒ‹‚ª’u‚©‚ê‚Ä‚¢‚éƒZƒ‹‚ğtrue‚Æ‚·‚é2ŸŒ³”z—ñ </param>
-    /// <param name="occupiedPaths"> Šm’è‚µ‚Ä‚¢‚éŒo˜H‚Åg—p‚µ‚Ä‚¢‚éƒZƒ‹‚ğtrue‚Æ‚·‚é2ŸŒ³”z—ñ </param>
-    /// <param name="maxPaths"> —ñ‹“‚·‚éŒo˜H‚ÌÅ‘å” </param>
-    /// <param name="slack"> ’Tõ‚ÅŒ©‚Â‚¯‚½Œo˜H(ƒZƒ‹À•WƒŠƒXƒg)‚ÌƒŠƒXƒg </param>
+    /// <param name="start"> é–‹å§‹ã‚»ãƒ« </param>
+    /// <param name="end"> çµ‚ç‚¹ã‚»ãƒ« </param>
+    /// <param name="tileOccupied"> ã‚¿ã‚¤ãƒ«ãŒç½®ã‹ã‚Œã¦ã„ã‚‹ã‚»ãƒ«ã‚’trueã¨ã™ã‚‹2æ¬¡å…ƒé…åˆ— </param>
+    /// <param name="occupiedPaths"> ç¢ºå®šã—ã¦ã„ã‚‹çµŒè·¯ã§ä½¿ç”¨ã—ã¦ã„ã‚‹ã‚»ãƒ«ã‚’trueã¨ã™ã‚‹2æ¬¡å…ƒé…åˆ— </param>
+    /// <param name="maxPaths"> åˆ—æŒ™ã™ã‚‹çµŒè·¯ã®æœ€å¤§æ•° </param>
+    /// <param name="slack"> æ¢ç´¢ã§è¦‹ã¤ã‘ãŸçµŒè·¯(ã‚»ãƒ«åº§æ¨™ãƒªã‚¹ãƒˆ)ã®ãƒªã‚¹ãƒˆ </param>
     /// <returns></returns>
     private List<List<Vector2Int>> EnumeratePaths(Vector2Int start, Vector2Int end, bool[,] tileOccupied, bool[,] occupiedPaths, int maxPaths, int slack)
     {
@@ -282,12 +282,12 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// n“_‚©‚çI“_ ‚ÌÅ’Z‹——£‚ğ‹‚ß‚éB
+    /// å§‹ç‚¹ã‹ã‚‰çµ‚ç‚¹ ã®æœ€çŸ­è·é›¢ã‚’æ±‚ã‚ã‚‹ã€‚
     /// </summary>
-    /// <param name="tileOccupied"> ƒ^ƒCƒ‹‚ª’u‚©‚ê‚Ä‚¢‚éƒZƒ‹‚ğtrue‚Æ‚·‚é2ŸŒ³”z—ñ </param>
-    /// <param name="occupiedPaths"> Šm’è‚µ‚Ä‚¢‚éŒo˜H‚Åg—p‚µ‚Ä‚¢‚éƒZƒ‹‚ğtrue‚Æ‚·‚é2ŸŒ³”z—ñ </param>
-    /// <param name="start"> ŠJnƒZƒ‹ </param>
-    /// <param name="end"> I“_ƒZƒ‹ </param>
+    /// <param name="tileOccupied"> ã‚¿ã‚¤ãƒ«ãŒç½®ã‹ã‚Œã¦ã„ã‚‹ã‚»ãƒ«ã‚’trueã¨ã™ã‚‹2æ¬¡å…ƒé…åˆ— </param>
+    /// <param name="occupiedPaths"> ç¢ºå®šã—ã¦ã„ã‚‹çµŒè·¯ã§ä½¿ç”¨ã—ã¦ã„ã‚‹ã‚»ãƒ«ã‚’trueã¨ã™ã‚‹2æ¬¡å…ƒé…åˆ— </param>
+    /// <param name="start"> é–‹å§‹ã‚»ãƒ« </param>
+    /// <param name="end"> çµ‚ç‚¹ã‚»ãƒ« </param>
     /// <returns></returns>
     private int ShortestDistance(bool[,] tileOccupied, bool[,] occupiedPaths, Vector2Int start, Vector2Int end)
     {
@@ -318,7 +318,7 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// w’èƒvƒŒƒnƒu‚ğg‚Á‚Äƒ^ƒCƒ‹‚ğ”z’u‚·‚é
+    /// æŒ‡å®šãƒ—ãƒ¬ãƒãƒ–ã‚’ä½¿ã£ã¦ã‚¿ã‚¤ãƒ«ã‚’é…ç½®ã™ã‚‹
     /// </summary>
     private void PlaceTile(Vector2Int pos, string type, GameObject prefab)
     {
@@ -326,7 +326,7 @@ public class BoardManager : MonoBehaviour
 
         GameObject go = Instantiate(prefab, _gridParent);
 
-        // ¶‰ºŒ´“_‚É‘µ‚¦‚é
+        // å·¦ä¸‹åŸç‚¹ã«æƒãˆã‚‹
         float xOffset = (pos.x - (_gridSize - 1) * 0.5f) * _cellSpacing;
         float yOffset = (pos.y - (_gridSize - 1) * 0.5f) * _cellSpacing;
         float zFixed = 0f;
@@ -344,9 +344,9 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒŠƒXƒg‚ğƒ‰ƒ“ƒ_ƒ€‚ÉƒVƒƒƒbƒtƒ‹(”z’u‚Ì•Î‚è‚ğ–h‚®)
+    /// ãƒªã‚¹ãƒˆã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«ã‚·ãƒ£ãƒƒãƒ•ãƒ«(é…ç½®ã®åã‚Šã‚’é˜²ã)
     /// </summary>
-    /// <typeparam name="T"> ƒVƒƒƒbƒtƒ‹‚Ì—v‘fŒ^ </typeparam>
+    /// <typeparam name="T"> ã‚·ãƒ£ãƒƒãƒ•ãƒ«ã®è¦ç´ å‹ </typeparam>
     /// <param name="list"></param>
     private void Shuffle<T>(List<T> list)
     {
@@ -358,7 +358,7 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// line‚ÌƒŠƒZƒbƒg
+    /// lineã®ãƒªã‚»ãƒƒãƒˆ
     /// </summary>
     public void ResetLine()
     {
@@ -371,7 +371,7 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ‘SƒyƒA‚Ì”‚ğ“n‚·
+    /// å…¨ãƒšã‚¢ã®æ•°ã‚’æ¸¡ã™
     /// </summary>
     /// <returns></returns>
     public int GetTotalPairs()
@@ -380,7 +380,7 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// w’èƒZƒ‹‚ğ•Ô‚·
+    /// æŒ‡å®šã‚»ãƒ«ã‚’è¿”ã™
     /// </summary>
     /// <param name="cell"></param>
     /// <returns></returns>
@@ -392,7 +392,7 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ‘Sƒ^ƒCƒ‹‚Ìíœ
+    /// å…¨ã‚¿ã‚¤ãƒ«ã®å‰Šé™¤
     /// </summary>
     private void ClearGrid()
     {
