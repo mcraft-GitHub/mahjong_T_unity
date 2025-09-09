@@ -6828,7 +6828,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 464402132}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3deb2609990d14a44be76297059665f8, type: 3}
+  m_Script: {fileID: 11500000, guid: a09373a6f2992c04e9d28cae468fdba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &464402134
@@ -9061,7 +9061,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 590755991}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c0718884b7b9f243ad2248380fd8048, type: 3}
+  m_Script: {fileID: 11500000, guid: 95ca7324c8bac6f4fb98bccb4612efbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _pairsLeftText: {fileID: 392858100}
@@ -31019,7 +31019,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fe59e24b755fc547ad2376b57b911f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gameManager: {fileID: 768668429}
   _gridSize: 8
   _maxTileTypes: 6
   _cellSpacing: 2.5
