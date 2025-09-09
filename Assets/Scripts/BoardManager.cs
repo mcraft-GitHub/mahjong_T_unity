@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -6,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public class BoardManager : MonoBehaviour
 {
+    public event Action OnSceneChangeRequest;
+
     [Header("Game Settings")]
     public int _gridSize = 8;
     public int _maxTileTypes = 6;
@@ -95,27 +98,15 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        ForcedRandomPlacement(prefabPool);
+        HandlePlacementFailure();
     }
 
     /// <summary>
-    /// 経路を無視してランダムにペアを配置する処理
+    /// 配置失敗,タイトル画面に戻す
     /// </summary>
-    private void ForcedRandomPlacement(List<GameObject> types)
+    private void HandlePlacementFailure()
     {
-        List<Vector2Int> allCells = new List<Vector2Int>();
-        for (var x = 0; x < _gridSize; x++)
-            for (var y = 0; y < _gridSize; y++)
-                allCells.Add(new Vector2Int(x, y));
-        Shuffle(allCells);
-        int idx = 0;
-        _tiles = new Tile[_gridSize, _gridSize];
-        for (var i = 0; i < types.Count; i++)
-        {
-            PlaceTile(allCells[idx++], $"Tile{i}", types[i]);
-            PlaceTile(allCells[idx++], $"Tile{i}", types[i + 1]);
-        }
-        _totalPairs = types.Count;
+        OnSceneChangeRequest?.Invoke();
     }
 
     /// <summary>
