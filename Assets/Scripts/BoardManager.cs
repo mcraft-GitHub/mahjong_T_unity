@@ -1,52 +1,64 @@
+ï»¿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ”Õã ‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+/// ç›¤ä¸Š ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class BoardManager : MonoBehaviour
 {
-    [SerializeField] private GameManager _gameManager;
+    public event Action OnSceneChangeRequest;
 
     [Header("Game Settings")]
     public int _gridSize = 8;
     public int _maxTileTypes = 6;
+    public float _cellSpacing = 1.1f;
 
-    [Header("Tile / Grid UI")]
-    [SerializeField] private GameObject _tilePrefab;
-    [SerializeField] private RectTransform _gridParent;
+    [Header("Tile / Grid Prefabs")]
+    [SerializeField] private List<GameObject> _tilePrefabs;
+    [SerializeField] private Transform _gridParent;
     [SerializeField] private LineManager _lineManager;
-
-    [Header("Colors")]
-    [SerializeField] private Color[] _typeColors;
 
     private Tile[,] _tiles;
     private List<Tile> _selectedTiles = new();
     private int _totalPairs = 0;
 
-    private readonly List<string> _allTypes = new() { "“Œ", "¼", "“ì", "–k", "@", "á¢", "’†" };
     private System.Random _rand = new System.Random();
-    private int _maxPlacementAttempts = 800;
-    private int _maxPathsPerPair = 40;
-    private int _pathSlack = 6;
 
+    static readonly int MAX_PATHS_PER_PAIR = 40;
+    static readonly int MAX_PLACEMENT_ATTEMPTS = 800;
+    static readonly int PATH_SLACK = 6;
+
+    // æ¢ç´¢æ–¹å‘(ä¸Šä¸‹å·¦å³)
+    static readonly Vector2Int[] DIRS = 
+    {
+        new Vector2Int(1, 0),
+        new Vector2Int(-1, 0),
+        new Vector2Int(0, 1),
+        new Vector2Int(0, -1)
+    };
 
     /// <summary>
-    /// ƒQ[ƒ€‚Ì”Õ–Ê‚ğƒŠƒZƒbƒg
+    /// ã‚²ãƒ¼ãƒ ã®ç›¤é¢ã‚’ãƒªã‚»ãƒƒãƒˆ
     /// </summary>
     public void ResetBoard()
     {
+        ClearGrid();
         if (_tiles != null)
         {
-            foreach (var t in _tiles)
+            foreach (var tile in _tiles)
             {
-                if (t != null && t.gameObject != null)
-                    Destroy(t.gameObject);
+                if (tile != null && tile.gameObject != null)
+                {
+                    Destroy(tile.gameObject);
+                }
             }
         }
+
         _tiles = new Tile[_gridSize, _gridSize];
         _selectedTiles.Clear();
         _totalPairs = 0;
+        Shuffle(_tilePrefabs);
 
         ResetLine();
 
@@ -54,100 +66,83 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒ‰ƒ“ƒ_ƒ€”z’u
+    /// ãƒ©ãƒ³ãƒ€ãƒ é…ç½®
     /// </summary>
     private void GenerateBoardSafe()
     {
-        // Œˆ’è‚·‚éí—Ş”
-        int typeCount = Mathf.Min(_maxTileTypes, _allTypes.Count);
-        List<string> types = new List<string>(_allTypes);
-        Shuffle(types);
-        types = types.GetRange(0, typeCount);
+        // æ±ºå®šã™ã‚‹ç¨®é¡æ•°
+        int typeCount = Mathf.Min(_maxTileTypes, _tilePrefabs.Count);
 
-        bool success = false;
-        for (int attempt = 0; attempt < _maxPlacementAttempts; attempt++)
+        // ä½¿ç”¨ã™ã‚‹ãƒ—ãƒ¬ãƒãƒ–ã‚’ã‚·ãƒ£ãƒƒãƒ•ãƒ«ã—ã¦ã€ãƒšã‚¢ã”ã¨ã«é¸æŠ
+        List<GameObject> prefabPool = new List<GameObject>(_tilePrefabs);
+        Shuffle(prefabPool);
+        prefabPool = prefabPool.GetRange(0, typeCount);
+
+        for (var attempt = 0; attempt < MAX_PLACEMENT_ATTEMPTS; attempt++)
         {
-            // ƒ‰ƒ“ƒ_ƒ€‚É 2*typeCount ŒÂ‚ÌƒZƒ‹‚ğ‘I‚Ô
+            // ç›¤é¢ã‚»ãƒ«ãƒªã‚¹ãƒˆ
             List<Vector2Int> allCells = new List<Vector2Int>();
-            for (int x = 0; x < _gridSize; x++)
-                for (int y = 0; y < _gridSize; y++)
+            for (var x = 0; x < _gridSize; x++)
+                for (var y = 0; y < _gridSize; y++)
                     allCells.Add(new Vector2Int(x, y));
             Shuffle(allCells);
 
             List<Vector2Int> chosen = allCells.GetRange(0, typeCount * 2);
 
-            // ƒ‰ƒ“ƒ_ƒ€‚ÉƒyƒA‚É‚·‚é
+            // ãƒ©ãƒ³ãƒ€ãƒ ã«ãƒšã‚¢ã«ã™ã‚‹
             Shuffle(chosen);
-            var pairs = new List<PairPlacement>();
-            for (int i = 0; i < typeCount; i++)
+            List<PairPlacement> pairs = new List<PairPlacement>();
+            for (var i = 0; i < typeCount; i++)
             {
-                Vector2Int a = chosen[2 * i];
-                Vector2Int b = chosen[2 * i + 1];
-                pairs.Add(new PairPlacement(a, b, types[i]));
+                Vector2Int a = chosen[i * 2];
+                Vector2Int b = chosen[i * 2 + 1];
+                pairs.Add(new PairPlacement(a, b, $"Tile{i}"));
             }
 
-            // ‘SƒyƒA‚ğd•¡‚µ‚È‚¢ƒpƒX‚ÅŒq‚°‚é‚©
+            // å…¨ãƒšã‚¢ã‚’é‡è¤‡ã—ãªã„ãƒ‘ã‚¹ã§ç¹‹ã’ã‚‹ã‹
             if (TryRouteAllPairs(pairs))
             {
-                // ¬Œ÷FUI ‚É”½‰f‚µ‚ÄŠ®—¹
-                PlaceTilesFromPairs(pairs);
+                // æˆåŠŸï¼šUI ã«åæ˜ ã—ã¦å®Œäº†
+                PlaceTilesFromPairs(pairs, prefabPool);
                 _totalPairs = typeCount;
-                success = true;
-                Debug.Log($"[GenerateBoardSafe] success after {attempt + 1} attempts");
-                break;
+                return;
             }
         }
 
-        if (!success)
-        {
-            Debug.LogError("[GenerateBoardSafe] Failed to create solvable board after attempts. Falling back to naive placement.");
-            // ƒtƒH[ƒ‹ƒoƒbƒN
-            FallbackPlace(types);
-        }
+        HandlePlacementFailure();
     }
 
     /// <summary>
-    /// Œo˜H‚ğ–³‹‚µ‚Äƒ‰ƒ“ƒ_ƒ€‚ÉƒyƒA‚ğ”z’u‚·‚éƒtƒH[ƒ‹ƒoƒbƒNˆ—
+    /// é…ç½®å¤±æ•—,ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢ã«æˆ»ã™
     /// </summary>
-    private void FallbackPlace(List<string> types)
+    private void HandlePlacementFailure()
     {
-        List<Vector2Int> allCells = new List<Vector2Int>();
-        for (int x = 0; x < _gridSize; x++)
-            for (int y = 0; y < _gridSize; y++)
-                allCells.Add(new Vector2Int(x, y));
-        Shuffle(allCells);
-        int idx = 0;
-        _tiles = new Tile[_gridSize, _gridSize];
-        for (int i = 0; i < types.Count; i++)
-        {
-            PlaceTile(allCells[idx++], types[i]);
-            PlaceTile(allCells[idx++], types[i]);
-        }
-        _totalPairs = types.Count;
+        OnSceneChangeRequest?.Invoke();
     }
 
     /// <summary>
-    /// ƒyƒAƒŠƒXƒg ‚ğ UI ‚É”½‰f
+    /// ãƒšã‚¢ãƒªã‚¹ãƒˆ ã‚’ UI ã«åæ˜ 
     /// </summary>
-    private void PlaceTilesFromPairs(List<PairPlacement> pairs)
+    private void PlaceTilesFromPairs(List<PairPlacement> pairs, List<GameObject> types)
     {
-        // ”Õ–Ê‚Ìƒ^ƒCƒ‹”z—ñ‚ğ‰Šú‰»
+        // ç›¤é¢ã®ã‚¿ã‚¤ãƒ«é…åˆ—ã‚’åˆæœŸåŒ–
         _tiles = new Tile[_gridSize, _gridSize];
 
-        for (int i = 0; i < pairs.Count; i++)
+        for (var i = 0; i < pairs.Count; i++)
         {
             var p = pairs[i];
-            PlaceTile(p._pairPlacementA, p._type);
-            PlaceTile(p._pairPlacementB, p._type);
+            GameObject prefab = _tilePrefabs[i % _tilePrefabs.Count];
+            PlaceTile(p._pairPlacementA, p._type, prefab);
+            PlaceTile(p._pairPlacementB, p._type, prefab);
         }
     }
 
     /// <summary>
-    /// ‚¨Œİ‚¢‚ÉŠ±Â‚µ‚È‚¢Œo˜H‚ÅŒq‚°‚é‚©
+    /// ãŠäº’ã„ã«å¹²æ¸‰ã—ãªã„çµŒè·¯ã§ç¹‹ã’ã‚‹ã‹
     /// </summary>
     private bool TryRouteAllPairs(List<PairPlacement> pairs)
     {
-        // ‘S‚Ä‚ÌƒyƒA‚Ì—¼’[‚ğè—L
+        // å…¨ã¦ã®ãƒšã‚¢ã®ä¸¡ç«¯ã‚’å æœ‰
         bool[,] tileOccupied = new bool[_gridSize, _gridSize];
         foreach (var p in pairs)
         {
@@ -155,31 +150,33 @@ public class BoardManager : MonoBehaviour
             tileOccupied[p._pairPlacementB.x, p._pairPlacementB.y] = true;
         }
 
-        bool[,] occupiedPaths = new bool[_gridSize, _gridSize]; // ‹ó
+        bool[,] occupiedPaths = new bool[_gridSize, _gridSize]; // ç©º
 
-        // “ï‚µ‚¢ƒyƒA‚©‚çˆ—‚µ‚½•û‚ª—Ç‚¢(Å’Z‹——£‚ª’·‚¢‚à‚Ì‚©‚çæ‚Éˆ—)
+        // é›£ã—ã„ãƒšã‚¢ã‹ã‚‰å‡¦ç†ã—ãŸæ–¹ãŒè‰¯ã„(æœ€çŸ­è·é›¢ãŒé•·ã„ã‚‚ã®ã‹ã‚‰å…ˆã«å‡¦ç†)
         var pairInfo = new List<PairWithDist>();
         foreach (var p in pairs)
         {
             int d = ShortestDistance(tileOccupied, occupiedPaths, p._pairPlacementA, p._pairPlacementB);
-            if (d < 0) d = int.MaxValue; // “’B•s‰Â
+            
+            // åˆ°é”ä¸å¯
+            if (d < 0) d = int.MaxValue;
             pairInfo.Add(new PairWithDist(p, d));
         }
-        // ’·‚¢‹——£(“ï‚µ‚¢)‚ğæ‚É
+        // é•·ã„è·é›¢(é›£ã—ã„)ã‚’å…ˆã«
         pairInfo.Sort((x, y) => y._dist.CompareTo(x._dist));
 
-        // ì‚è’¼‚µ‚½‡˜‚Ì pairsOrdered ‚ğì‚é
+        // ä½œã‚Šç›´ã—ãŸé †åºã® pairsOrdered ã‚’ä½œã‚‹
         var pairsOrdered = new List<PairPlacement>();
         foreach (var pw in pairInfo) pairsOrdered.Add(pw._pair);
 
-        // Ä‹A‚Åƒ‹[ƒeƒBƒ“ƒO
+        // å†å¸°ã§ãƒ«ãƒ¼ãƒ†ã‚£ãƒ³ã‚°
         var chosenPaths = new List<List<Vector2Int>>(); // optional: store chosen paths
         bool ok = RoutePairsRecursive(pairsOrdered, 0, tileOccupied, occupiedPaths, chosenPaths);
         return ok;
     }
 
     /// <summary>
-    /// Ä‹A“I‚ÉƒyƒA‚ÌŒo˜H‚ğ’Tõ‚µ‚Ä‘S‚Ä‚Â‚È‚°‚é
+    /// å†å¸°çš„ã«ãƒšã‚¢ã®çµŒè·¯ã‚’æ¢ç´¢ã—ã¦å…¨ã¦ã¤ãªã’ã‚‹
     /// </summary>
     /// <param name="pairs"></param>
     /// <param name="idx"></param>
@@ -189,119 +186,91 @@ public class BoardManager : MonoBehaviour
     /// <returns></returns>
     private bool RoutePairsRecursive(List<PairPlacement> pairs, int idx, bool[,] tileOccupied, bool[,] occupiedPaths, List<List<Vector2Int>> chosenPaths)
     {
-        // ‘SƒyƒAˆ—Ï‚İ‚È‚ç¬Œ÷
         if (idx >= pairs.Count) return true;
 
         var p = pairs[idx];
+        var cellArray = EnumeratePaths(p._pairPlacementA, p._pairPlacementB, tileOccupied, occupiedPaths, MAX_PATHS_PER_PAIR, PATH_SLACK);
 
-        // Œó•âƒpƒX‚ğ—ñ‹“
-        var candidates = EnumeratePaths(p._pairPlacementA, p._pairPlacementB, tileOccupied, occupiedPaths, _maxPathsPerPair, _pathSlack);
+        if (cellArray == null || cellArray.Count == 0) return false;
 
-        if (candidates == null || candidates.Count == 0)
+        for (var x = 0; x < cellArray.Count; x++)
         {
-            // “’B•s‰Â
-            return false;
-        }
-
-        foreach (var path in candidates)
-        {
-            // Œo˜HƒZƒ‹‚ğˆê“I‚Éè—Lˆµ‚¢‚É‚·‚é
             var occupiedList = new List<Vector2Int>();
-            for (int k = 0; k < path.Count; k++)
+            for (var y = 0; y < cellArray[x].Count; y++)
             {
-                Vector2Int cell = path[k];
+                var cell = cellArray[x][y];
                 if (cell == p._pairPlacementA || cell == p._pairPlacementB) continue;
                 if (!occupiedPaths[cell.x, cell.y])
                 {
                     occupiedPaths[cell.x, cell.y] = true;
                     occupiedList.Add(cell);
                 }
-                else { }
             }
 
-            chosenPaths.Add(path);
-            // Ä‹A
+            // æ¬¡ã®ãƒšã‚¢ã‚’å‡¦ç†
+            chosenPaths.Add(cellArray[x]);
             if (RoutePairsRecursive(pairs, idx + 1, tileOccupied, occupiedPaths, chosenPaths))
                 return true;
 
-            // ƒ[ƒ‹ƒoƒbƒN
+            // ãƒãƒƒã‚¯ãƒˆãƒ©ãƒƒã‚¯
             chosenPaths.RemoveAt(chosenPaths.Count - 1);
-            foreach (var c in occupiedList) occupiedPaths[c.x, c.y] = false;
+            foreach (var c in occupiedList)
+                occupiedPaths[c.x, c.y] = false;
         }
 
-        return false; // ‘SŒo˜H¸”s
+
+        return false;
     }
 
     /// <summary>
-    /// ƒyƒA‚Ì n“_‚©‚çI“_‚Ü‚Å‚ÌŒo˜H‚ğDFS‚Å—ñ‹“
+    /// ãƒšã‚¢ã® å§‹ç‚¹ã‹ã‚‰çµ‚ç‚¹ã¾ã§ã®çµŒè·¯ã‚’DFSã§åˆ—æŒ™
     /// </summary>
-    /// <param name="start"> ŠJnƒZƒ‹ </param>
-    /// <param name="end"> I“_ƒZƒ‹ </param>
-    /// <param name="tileOccupied"> ƒ^ƒCƒ‹‚ª’u‚©‚ê‚Ä‚¢‚éƒZƒ‹‚ğtrue‚Æ‚·‚é2ŸŒ³”z—ñ </param>
-    /// <param name="occupiedPaths"> Šm’è‚µ‚Ä‚¢‚éŒo˜H‚Åg—p‚µ‚Ä‚¢‚éƒZƒ‹‚ğtrue‚Æ‚·‚é2ŸŒ³”z—ñ </param>
-    /// <param name="maxPaths"> —ñ‹“‚·‚éŒo˜H‚ÌÅ‘å” </param>
-    /// <param name="slack"> ’Tõ‚ÅŒ©‚Â‚¯‚½Œo˜H(ƒZƒ‹À•WƒŠƒXƒg)‚ÌƒŠƒXƒg </param>
+    /// <param name="start"> é–‹å§‹ã‚»ãƒ« </param>
+    /// <param name="end"> çµ‚ç‚¹ã‚»ãƒ« </param>
+    /// <param name="tileOccupied"> ã‚¿ã‚¤ãƒ«ãŒç½®ã‹ã‚Œã¦ã„ã‚‹ã‚»ãƒ«ã‚’trueã¨ã™ã‚‹2æ¬¡å…ƒé…åˆ— </param>
+    /// <param name="occupiedPaths"> ç¢ºå®šã—ã¦ã„ã‚‹çµŒè·¯ã§ä½¿ç”¨ã—ã¦ã„ã‚‹ã‚»ãƒ«ã‚’trueã¨ã™ã‚‹2æ¬¡å…ƒé…åˆ— </param>
+    /// <param name="maxPaths"> åˆ—æŒ™ã™ã‚‹çµŒè·¯ã®æœ€å¤§æ•° </param>
+    /// <param name="slack"> æ¢ç´¢ã§è¦‹ã¤ã‘ãŸçµŒè·¯(ã‚»ãƒ«åº§æ¨™ãƒªã‚¹ãƒˆ)ã®ãƒªã‚¹ãƒˆ </param>
     /// <returns></returns>
     private List<List<Vector2Int>> EnumeratePaths(Vector2Int start, Vector2Int end, bool[,] tileOccupied, bool[,] occupiedPaths, int maxPaths, int slack)
     {
-        // ‚Ü‚¸Å’Z‹——£‚ğ BFS ‚Å‹‚ß‚é
         int shortest = ShortestDistance(tileOccupied, occupiedPaths, start, end);
         if (shortest < 0) return new List<List<Vector2Int>>();
 
         int maxLen = shortest + slack;
-
         List<List<Vector2Int>> results = new List<List<Vector2Int>>();
         bool[,] visited = new bool[_gridSize, _gridSize];
-        List<Vector2Int> cur = new List<Vector2Int>();
-        cur.Add(start);
+        List<Vector2Int> cur = new List<Vector2Int> { start };
         visited[start.x, start.y] = true;
 
-        // ƒqƒ…[ƒŠƒXƒeƒBƒbƒN‚É‹ß‚¢•ûŒü‚©‚ç’Tõ‚·‚é‚½‚ß‚É—×Ú‡‚ğƒ\[ƒg
         void Dfs(Vector2Int node)
         {
             if (results.Count >= maxPaths) return;
             if (cur.Count > maxLen + 1) return;
-
             if (node == end)
             {
                 results.Add(new List<Vector2Int>(cur));
                 return;
             }
 
-            // —×Ú‚ğæ“¾
-            var neighbors = new List<Vector2Int>()
-            {
-                node + new Vector2Int(1,0),
-                node + new Vector2Int(-1,0),
-                node + new Vector2Int(0,1),
-                node + new Vector2Int(0,-1)
-            };
+            // è¿‘ã„é †ã«ä¸¦ã³å¤‰ãˆã¦æ¢ç´¢(ãƒ’ãƒ¥ãƒ¼ãƒªã‚¹ãƒ†ã‚£ãƒƒã‚¯)
+            var neighbors = new List<Vector2Int>();
+            foreach (var d in DIRS)
+                neighbors.Add(node + d);
 
             neighbors.Sort((a, b) => (Mathf.Abs(a.x - end.x) + Mathf.Abs(a.y - end.y)).CompareTo(Mathf.Abs(b.x - end.x) + Mathf.Abs(b.y - end.y)));
 
             foreach (var n in neighbors)
             {
-                if (results.Count >= maxPaths) break;
-                if (n.x < 0 || n.x >= _gridSize || n.y < 0 || n.y >= _gridSize) continue;
-                if (visited[n.x, n.y]) continue;
-
-                // ’Ês‰Â”\‚©”»’è
-                bool isEnd = (n == end);
-                if (!isEnd)
+                if (CanVisit(n, end, tileOccupied, occupiedPaths, visited, cur, maxLen))
                 {
-                    if (tileOccupied[n.x, n.y]) continue;
-                    if (occupiedPaths[n.x, n.y]) continue;
+                    // å†èµ·æ¢ç´¢
+                    visited[n.x, n.y] = true;
+                    cur.Add(n);
+                    Dfs(n);
+                    cur.RemoveAt(cur.Count - 1);
+                    visited[n.x, n.y] = false;
                 }
-
-                // „‘ª‹——£‚Ìƒ`ƒFƒbƒN(c‚èÅ’Z‹——£)
-                int remainingMan = Mathf.Abs(n.x - end.x) + Mathf.Abs(n.y - end.y);
-                if (cur.Count + remainingMan > maxLen + 1) continue;
-
-                visited[n.x, n.y] = true;
-                cur.Add(n);
-                Dfs(n);
-                cur.RemoveAt(cur.Count - 1);
-                visited[n.x, n.y] = false;
             }
         }
 
@@ -310,12 +279,51 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// BFS‚Å n“_‚©‚çI“_ ‚ÌÅ’Z‹——£‚ğ‹‚ß‚éB
+    /// å†èµ·æ¢ç´¢ã®å®Ÿè¡Œæ¡ä»¶å‡¦ç†
     /// </summary>
-    /// <param name="tileOccupied"> ƒ^ƒCƒ‹‚ª’u‚©‚ê‚Ä‚¢‚éƒZƒ‹‚ğtrue‚Æ‚·‚é2ŸŒ³”z—ñ </param>
-    /// <param name="occupiedPaths"> Šm’è‚µ‚Ä‚¢‚éŒo˜H‚Åg—p‚µ‚Ä‚¢‚éƒZƒ‹‚ğtrue‚Æ‚·‚é2ŸŒ³”z—ñ </param>
-    /// <param name="start"> ŠJnƒZƒ‹ </param>
-    /// <param name="end"> I“_ƒZƒ‹ </param>
+    /// <param name="n"> åˆ¤å®šå¯¾è±¡ã®ã‚»ãƒ«åº§æ¨™ </param>
+    /// <param name="end"> æ¢ç´¢ã®çµ‚ç‚¹ã‚»ãƒ«åº§æ¨™ </param>
+    /// <param name="tileOccupied"> ç›¤é¢ä¸Šã§å›ºå®šã‚¿ã‚¤ãƒ«ãŒé…ç½®ã•ã‚Œã¦ã„ã‚‹ã‹ã‚’ç¤ºã™ãƒ•ãƒ©ã‚°é…åˆ— </param>
+    /// <param name="occupiedPaths"> æ—¢ã«ç¢ºå®šã—ãŸçµŒè·¯ã‚»ãƒ«ã‚’ç¤ºã™ãƒ•ãƒ©ã‚°é…åˆ— </param>
+    /// <param name="visited"> ä»Šå›ã®æ¢ç´¢ã§æ—¢ã«è¨ªå•æ¸ˆã¿ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°é…åˆ— </param>
+    /// <param name="cur"> ç¾åœ¨ã®æ¢ç´¢çµŒè·¯ãƒªã‚¹ãƒˆ </param>
+    /// <param name="maxLen"> æ¢ç´¢çµŒè·¯ã®è¨±å®¹æœ€å¤§é•· </param>
+    /// <returns></returns>
+    private bool CanVisit(Vector2Int n, Vector2Int end, bool[,] tileOccupied, bool[,] occupiedPaths, bool[,] visited, List<Vector2Int> cur, int maxLen)
+    {
+        // ç›¤é¢å¤–
+        if (n.x < 0 || n.x >= _gridSize || n.y < 0 || n.y >= _gridSize)
+            return false;
+
+        // è¨ªå•æ¸ˆã¿
+        if (visited[n.x, n.y])
+            return false;
+
+        bool isEnd = (n == end);
+        if (!isEnd)
+        {
+            // ã‚¿ã‚¤ãƒ«é…ç½®ã‚»ãƒ«ãƒ»æ—¢å­˜ã®çµŒè·¯ã‚»ãƒ«
+            if (tileOccupied[n.x, n.y])
+                return false;
+            if (occupiedPaths[n.x, n.y])
+                return false;
+        }
+
+        // ä¸Šé™ã‚ªãƒ¼ãƒãƒ¼åˆ¤å®š
+        int remainingMan = Mathf.Abs(n.x - end.x) + Mathf.Abs(n.y - end.y);
+        if (cur.Count + remainingMan > maxLen + 1)
+            return false;
+
+        return true;
+    }
+
+    /// <summary>
+    /// å§‹ç‚¹ã‹ã‚‰çµ‚ç‚¹ ã®æœ€çŸ­è·é›¢ã‚’æ±‚ã‚ã‚‹ã€‚
+    /// </summary>
+    /// <param name="tileOccupied"> ã‚¿ã‚¤ãƒ«ãŒç½®ã‹ã‚Œã¦ã„ã‚‹ã‚»ãƒ«ã‚’trueã¨ã™ã‚‹2æ¬¡å…ƒé…åˆ— </param>
+    /// <param name="occupiedPaths"> ç¢ºå®šã—ã¦ã„ã‚‹çµŒè·¯ã§ä½¿ç”¨ã—ã¦ã„ã‚‹ã‚»ãƒ«ã‚’trueã¨ã™ã‚‹2æ¬¡å…ƒé…åˆ— </param>
+    /// <param name="start"> é–‹å§‹ã‚»ãƒ« </param>
+    /// <param name="end"> çµ‚ç‚¹ã‚»ãƒ« </param>
     /// <returns></returns>
     private int ShortestDistance(bool[,] tileOccupied, bool[,] occupiedPaths, Vector2Int start, Vector2Int end)
     {
@@ -324,11 +332,7 @@ public class BoardManager : MonoBehaviour
         Queue<(Vector2Int pos, int dist)> q = new Queue<(Vector2Int, int)>();
         q.Enqueue((start, 0));
         vis[start.x, start.y] = true;
-
-        Vector2Int[] dirs = new Vector2Int[] {
-            new Vector2Int(1,0), new Vector2Int(-1,0),
-            new Vector2Int(0,1), new Vector2Int(0,-1)
-        };
+        Vector2Int[] dirs = new Vector2Int[] { new Vector2Int(1, 0), new Vector2Int(-1, 0), new Vector2Int(0, 1), new Vector2Int(0, -1) };
 
         while (q.Count > 0)
         {
@@ -338,9 +342,7 @@ public class BoardManager : MonoBehaviour
                 Vector2Int n = pos + d;
                 if (n.x < 0 || n.x >= _gridSize || n.y < 0 || n.y >= _gridSize) continue;
                 if (vis[n.x, n.y]) continue;
-
                 if (n == end) return dist + 1;
-
                 if (tileOccupied[n.x, n.y]) continue;
                 if (occupiedPaths[n.x, n.y]) continue;
 
@@ -352,67 +354,47 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 2‚Â‚ÌƒZƒ‹‚Æ‚»‚Ìí—Ş‚ğ•Û
+    /// æŒ‡å®šãƒ—ãƒ¬ãƒãƒ–ã‚’ä½¿ã£ã¦ã‚¿ã‚¤ãƒ«ã‚’é…ç½®ã™ã‚‹
     /// </summary>
-    /// <param name="pos"> ”z’uæ‚ÌƒZƒ‹ˆ— </param>
-    /// <param name="type"> 2‚Â‚ÌƒZƒ‹‚Æ‚»‚Ìí—Ş‚Ì”Õ–Ê‚ğ”z’u </param>
-    private void PlaceTile(Vector2Int pos, string type)
+    private void PlaceTile(Vector2Int pos, string type, GameObject prefab)
     {
-        if (_tilePrefab == null || _gridParent == null) return;
+        if (prefab == null || _gridParent == null) return;
 
-        GameObject go = Instantiate(_tilePrefab, _gridParent);
-        RectTransform rt = go.GetComponent<RectTransform>();
-        if (rt != null && _lineManager != null)
-        {
-            // LineManager ‚ÌƒZƒ‹->anchoredPosition ‚ğg‚Á‚ÄˆÊ’u‡‚í‚¹
-            rt.anchoredPosition = _lineManager.CellToAnchored(pos);
-            Vector2 cellSize = GetCellSize();
-            rt.sizeDelta = cellSize;
-        }
+        GameObject go = Instantiate(prefab, _gridParent);
+
+        // å·¦ä¸‹åŸç‚¹ã«æƒãˆã‚‹
+        float xOffset = (pos.x - (_gridSize - 1) * 0.5f) * _cellSpacing;
+        float yOffset = (pos.y - (_gridSize - 1) * 0.5f) * _cellSpacing;
+        float zFixed = 0f;
+
+        go.transform.localPosition = new Vector3(xOffset, yOffset, zFixed);
+        go.transform.localRotation = Quaternion.identity;
+        go.transform.localScale = Vector3.one;
 
         Tile tile = go.GetComponent<Tile>();
         if (tile != null)
         {
-            tile.Setup(pos.x, pos.y, type, _gameManager);
+            tile.Setup(pos.x, pos.y, type);
             _tiles[pos.x, pos.y] = tile;
-
-            int idx = _allTypes.IndexOf(type);
-            if (idx < 0) idx = 0;
-            if (_typeColors != null && _typeColors.Length > 0)
-            {
-                UnityEngine.UI.Image img = go.GetComponent<UnityEngine.UI.Image>();
-                if (img != null) img.color = _typeColors[idx % _typeColors.Length];
-            }
         }
     }
 
     /// <summary>
-    /// ƒZƒ‹ƒTƒCƒY‚ÌŒvZ
+    /// ãƒªã‚¹ãƒˆã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«ã‚·ãƒ£ãƒƒãƒ•ãƒ«(é…ç½®ã®åã‚Šã‚’é˜²ã)
     /// </summary>
-    /// <returns> ƒZƒ‹1‚Â‚Ì•‚Æ‚‚³(ƒfƒtƒHƒ‹ƒg‚Í(40,40)) </returns>
-    private Vector2 GetCellSize()
-    {
-        if (_gridParent == null) return new Vector2(40f, 40f);
-        return new Vector2(_gridParent.rect.width / _gridSize, _gridParent.rect.height / _gridSize);
-    }
-
-    /// <summary>
-    /// ƒŠƒXƒg‚ğƒ‰ƒ“ƒ_ƒ€‚ÉƒVƒƒƒbƒtƒ‹(”z’u‚Ì•Î‚è‚ğ–h‚®)
-    /// </summary>
-    /// <typeparam name="T"> ƒVƒƒƒbƒtƒ‹‚Ì—v‘fŒ^ </typeparam>
+    /// <typeparam name="T"> ã‚·ãƒ£ãƒƒãƒ•ãƒ«ã®è¦ç´ å‹ </typeparam>
+    /// <param name="list"></param>
     private void Shuffle<T>(List<T> list)
     {
-        for (int i = 0; i < list.Count; i++)
+        for (var i = 0; i < list.Count; i++)
         {
             int j = _rand.Next(i, list.Count);
-            var tmp = list[i];
-            list[i] = list[j];
-            list[j] = tmp;
+            (list[i], list[j]) = (list[j], list[i]);
         }
     }
 
     /// <summary>
-    /// line‚ÌƒŠƒZƒbƒg
+    /// lineã®ãƒªã‚»ãƒƒãƒˆ
     /// </summary>
     public void ResetLine()
     {
@@ -425,7 +407,7 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ‘SƒyƒA‚Ì”‚ğ“n‚·
+    /// å…¨ãƒšã‚¢ã®æ•°ã‚’æ¸¡ã™
     /// </summary>
     /// <returns></returns>
     public int GetTotalPairs()
@@ -434,15 +416,27 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// w’èƒZƒ‹‚ğ•Ô‚·
+    /// æŒ‡å®šã‚»ãƒ«ã‚’è¿”ã™
     /// </summary>
     /// <param name="cell"></param>
     /// <returns></returns>
     public Tile TileAt(Vector2Int cell)
     {
         if (_tiles == null) return null;
-        if (cell.x < 0 || cell.x >= _tiles.GetLength(0) ||
-            cell.y < 0 || cell.y >= _tiles.GetLength(1)) return null;
+        if (cell.x < 0 || cell.x >= _tiles.GetLength(0) || cell.y < 0 || cell.y >= _tiles.GetLength(1)) return null;
         return _tiles[cell.x, cell.y];
+    }
+
+    /// <summary>
+    /// å…¨ã‚¿ã‚¤ãƒ«ã®å‰Šé™¤
+    /// </summary>
+    private void ClearGrid()
+    {
+        if (_gridParent == null) return;
+
+        foreach (Transform child in _gridParent)
+        {
+            Destroy(child.gameObject);
+        }
     }
 }

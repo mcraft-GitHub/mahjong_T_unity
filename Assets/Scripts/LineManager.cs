@@ -1,131 +1,88 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
-/// ”Õ–Ê‚É•`‰æ‚³‚ê‚éü‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+/// ç›¤é¢ã«æç”»ã•ã‚Œã‚‹ç·šã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
-
 public class LineManager : MonoBehaviour
 {
+    private const float MIDPOINT_FACTOR = 0.5f;
+
     [Header("Grid Settings")]
-    // ƒQ[ƒ€”Õ–Ê‚Ìƒpƒlƒ‹
-    [SerializeField] private RectTransform _panel;
-    // ü‚ğŠi”[‚·‚é
-    [SerializeField] private RectTransform _lineContainer;
-    // s”
-    [SerializeField] public int _rows = 8;
-    // —ñ”
-    [SerializeField] public int _columns = 8;
+    [SerializeField] public int _gridSize = 8;
+    [SerializeField] private float _cellSpacing = 1.1f;
+    [SerializeField] private Transform _lineContainer;
 
     [Header("Line Prefab")]
     [SerializeField] private GameObject _linePrefab;
+    [SerializeField] private float _lineThickness = 0.1f;
+    [SerializeField] private float _segmentThinness = 0.5f; 
+    [SerializeField] private float _scaleCompensation = 0.5f;
 
-    [Header("Style")]
-    // ‘¾‚³
-    [SerializeField] private float _lineThickness = 6f;
+    // è¡Œãƒ»åˆ—
+    public int _rows = 8;
+    public int _columns = 8;
 
-    // Šm’èü‚Ì‰¼•`‰æ
+    // å›ºå®šç·šã¨Hoverç·šã‚’ç®¡ç†
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _fixedLines = new();
     private readonly HashSet<Vector2Int> _fixedOccupiedCells = new();
-
-    // ƒhƒ‰ƒbƒO’†‚Ìü
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _hoverLines = new();
 
-    private float GridWidth => _panel.rect.width;
-    private float GridHeight => _panel.rect.height;
-
     /// <summary>
-    /// ƒZƒ‹À•W‚ğUIÀ•W‚É•ÏŠ·
+    /// ã‚»ãƒ«åº§æ¨™ â†’ ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™
     /// </summary>
-    /// <param name="cell"> —ñ,s‚ÌƒZƒ‹À•W </param>
-    /// <returns> ƒZƒ‹‚Ì’†SÀ•W </returns>
-    public Vector2 CellToAnchored(Vector2Int cell)
+    public Vector3 CellToWorld(Vector2Int cell)
     {
-        float cw = GridWidth / _columns;
-        float ch = GridHeight / _rows;
-        float x = -GridWidth / 2f + cell.y * cw + cw / 2f;
-        float y = GridHeight / 2f - cell.x * ch - ch / 2f;
-        return new Vector2(x, y);
+        float halfGrid = (_gridSize - 1) * 0.5f;
+        float x = (cell.x - halfGrid) * _cellSpacing;
+        float y = (cell.y - halfGrid) * _cellSpacing;
+        return new Vector3(x, y, 0f);
     }
 
     /// <summary>
-    /// ‰æ–ÊÀ•W‚ğƒZƒ‹À•W‚É•ÏŠ·
+    /// ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ â†’ ã‚»ãƒ«åº§æ¨™
     /// </summary>
-    /// <param name="screenPos"> ƒXƒNƒŠ[ƒ“À•W </param>
-    /// <param name="cell"> •ÏŠ·Œã‚ÌƒZƒ‹À•W </param>
-    /// <returns> ”Õ–Ê“à‚©‚Ç‚¤‚© </returns>
     public bool ScreenToCell(Vector3 screenPos, out Vector2Int cell)
     {
-        Vector2 local;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(_lineContainer, screenPos, null, out local);
+        Plane plane = new Plane(Vector3.forward, Vector3.zero);
+        Ray ray = Camera.main.ScreenPointToRay(screenPos);
+        if (plane.Raycast(ray, out float enter))
+        {
+            Vector3 worldPos = ray.GetPoint(enter);
+            int x = Mathf.RoundToInt(worldPos.x / _cellSpacing + (_gridSize - 1) * 0.5f);
+            int y = Mathf.RoundToInt(worldPos.y / _cellSpacing + (_gridSize - 1) * 0.5f);
+            cell = new Vector2Int(x, y);
+            return Inside(cell);
+        }
 
-        float cw = GridWidth / _columns;
-        float ch = GridHeight / _rows;
-
-        int y = Mathf.FloorToInt((local.x + GridWidth / 2f) / cw);
-        int x = Mathf.FloorToInt((GridHeight / 2f - local.y) / ch);
-
-        cell = new Vector2Int(x, y);
-        return Inside(cell);
+        cell = Vector2Int.zero;
+        return false;
     }
 
     /// <summary>
-    /// ƒZƒ‹‚ª”Õ–Ê“à‚©‚Ç‚¤‚©
+    /// ç›¤é¢å†…ã‹ã©ã†ã‹
     /// </summary>
-    /// <param name="c"> ”»’è‚·‚éƒZƒ‹ </param>
-    /// <returns> ”ÍˆÍ“à‚È‚ç true </returns>
-    public bool Inside(Vector2Int c) => c.x >= 0 && c.x < _rows && c.y >= 0 && c.y < _columns;
-
-    /// <summary>
-    /// Šm’èüƒZƒ‹‚Ì’Ês•s‰Âƒ`ƒFƒbƒN
-    /// </summary>
-    /// <param name="cell"> ƒZƒ‹À•W </param>
-    /// <returns> Šm’èü‚ª‚ ‚ê‚Î true </returns>
-    public bool HasFixedOnCell(Vector2Int cell) => _fixedOccupiedCells.Contains(cell);
-
-    /// <summary>
-    /// 2ƒZƒ‹ŠÔ‚Éü‚ğ¶¬‚µ‚Ä”z’u
-    /// </summary>
-    /// <param name="from"> ŠJnƒZƒ‹ </param>
-    /// <param name="to"> I“_ƒZƒ‹ </param>
-    /// <param name="color"> ü‚ÌF </param>
-    /// <param name="isHover"> ƒhƒ‰ƒbƒN’†‚È‚ç true </param>
-    /// <returns> ¶¬‚³‚ê‚½ü‚ÌƒIƒuƒWƒFƒNƒg </returns>
-    private GameObject PlaceSegment(Vector2Int from, Vector2Int to, Color color, bool isHover)
+    public bool Inside(Vector2Int c)
     {
-        GameObject go = Instantiate(_linePrefab, _lineContainer);
-        RectTransform rt = go.GetComponent<RectTransform>();
-
-        Vector2 p0 = CellToAnchored(from);
-        Vector2 p1 = CellToAnchored(to);
-
-        rt.anchoredPosition = (p0 + p1) * 0.5f;
-        rt.sizeDelta = new Vector2(Vector2.Distance(p0, p1), _lineThickness);
-        float angle = Mathf.Atan2(p1.y - p0.y, p1.x - p0.x) * Mathf.Rad2Deg;
-        rt.rotation = Quaternion.Euler(0, 0, angle);
-
-        Image img = go.GetComponent<Image>();
-        if (img)
-            img.color = color;
-
-        (Vector2Int, Vector2Int) key = (from, to);
-        if (isHover)
-            _hoverLines[key] = go;
-        else 
-            _fixedLines[key] = go;
-        return go;
+        return c.x >= 0 && c.x < _gridSize && c.y >= 0 && c.y < _gridSize;
     }
 
     /// <summary>
-    /// ƒhƒ‰ƒbƒO’†‚ÌŒo˜H‚ğ•`‰æ
+    /// ç¢ºå®šç·šãŒãã®ã‚»ãƒ«ã«ã‚ã‚‹ã‹
     /// </summary>
-    /// <param name="path"> Œo˜H‚ÌƒZƒ‹‚Ì—ñ </param>
-    /// <param name="color"> ü‚ÌF </param>
+    public bool HasFixedOnCell(Vector2Int cell)
+    {
+        return _fixedOccupiedCells.Contains(cell);
+    }
+
+    /// <summary>
+    /// Hoverç·šã‚’æç”»
+    /// </summary>
     public void DrawHoverPath(List<Vector2Int> path, Color color)
     {
         ClearHoverLines();
         if (path == null || path.Count < 2) return;
+
         for (int i = 0; i < path.Count - 1; i++)
         {
             PlaceSegment(path[i], path[i + 1], color, true);
@@ -133,55 +90,54 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒhƒ‰ƒbƒO’†‚Ì‰¼ü‚ğ‘Síœ
+    /// Hoverç·šã‚’å…¨æ¶ˆå»
     /// </summary>
     public void ClearHoverLines()
     {
         foreach (var go in _hoverLines.Values)
-            Object.Destroy(go);
+            Destroy(go);
         _hoverLines.Clear();
     }
 
     /// <summary>
-    /// ü‚ÌŠm’è‰»
+    /// Hoverç·šã‚’ç¢ºå®šç·šã«æ˜‡æ ¼
     /// </summary>
-    /// <param name="path"> Šm’è‚³‚¹‚éŒo˜H </param>
-    /// <param name="fixedColor"> Šm’èü‚ÌF </param>
-    public void CommitHoverPath(List<Vector2Int> path, Color fixedColor)
+    public void CommitHoverPath(List<Vector2Int> path, Color color)
     {
-        if (path == null || path.Count < 2) 
+        if (path == null || path.Count < 2)
         {
             ClearHoverLines();
             return;
         }
 
-        // Šù‘¶ü‚ğÁ‚µ‚ÄAŒÅ’èü‚Æ‚µ‚ÄÄ•`‰æ
         ClearHoverLines();
         for (int i = 0; i < path.Count - 1; i++)
         {
-            PlaceSegment(path[i], path[i + 1], fixedColor, false);
+            PlaceSegment(path[i], path[i + 1], color, false);
         }
-        // è—LƒZƒ‹‚É’Ç‰Á
+
         foreach (var c in path)
+        {
             _fixedOccupiedCells.Add(c);
+        }
     }
 
     /// <summary>
-    /// ‘S‚Ä‚Ìü‚ğíœ
+    /// å…¨ã¦ã®ç·šã‚’å‰Šé™¤
     /// </summary>
     public void ClearAllLines()
     {
         foreach (var go in _fixedLines.Values)
-            Object.Destroy(go);
+            Destroy(go);
         foreach (var go in _hoverLines.Values)
-            Object.Destroy(go);
+            Destroy(go);
         _fixedLines.Clear();
         _hoverLines.Clear();
         _fixedOccupiedCells.Clear();
     }
 
     /// <summary>
-    /// ”Õ–ÊƒTƒCƒY•ÏX‚È‚Ç‚ÌÄƒŒƒCƒAƒEƒg
+    /// Gridå†è¨ˆç®—æ™‚ã«å…¨ç·šã‚’å†é…ç½®
     /// </summary>
     public void RecalcGrid()
     {
@@ -189,37 +145,55 @@ public class LineManager : MonoBehaviour
         {
             Vector2Int from = kv.Key.Item1;
             Vector2Int to = kv.Key.Item2;
-            RectTransform rt = kv.Value.GetComponent<RectTransform>();
-            UpdateSegmentTransform(rt, from, to);
+            UpdateSegmentTransform(kv.Value.transform, from, to);
         }
         foreach (var kv in _hoverLines)
         {
             Vector2Int from = kv.Key.Item1;
             Vector2Int to = kv.Key.Item2;
-            RectTransform rt = kv.Value.GetComponent<RectTransform>();
-            UpdateSegmentTransform(rt, from, to);
+            UpdateSegmentTransform(kv.Value.transform, from, to);
         }
     }
 
     /// <summary>
-    /// RectTransform ‚ÌüƒIƒuƒWƒFƒNƒg‚ğ fromƒJƒ‰ƒIƒPto ‚ÌƒZƒ‹ŠÔ‚É‡‚í‚¹‚Ä•ÏŒ`
+    /// ç·šã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆ
     /// </summary>
-    /// <param name="rt"> üƒIƒuƒWƒFƒNƒg‚Ì RectTransform </param>
-    /// <param name="from"> ŠJnƒZƒ‹ </param>
-    /// <param name="to"> I“_ƒZƒ‹ </param>
-    private void UpdateSegmentTransform(RectTransform rt, Vector2Int from, Vector2Int to)
+    private GameObject PlaceSegment(Vector2Int from, Vector2Int to, Color color, bool isHover)
     {
-        Vector2 p0 = CellToAnchored(from);
-        Vector2 p1 = CellToAnchored(to);
+        GameObject go = Instantiate(_linePrefab, _lineContainer);
 
-        // ’†“_‚É”z’u
-        rt.anchoredPosition = (p0 + p1) * 0.5f;
+        Vector3 p0 = CellToWorld(from);
+        Vector3 p1 = CellToWorld(to);
 
-        // ’·‚³‚ğƒZƒ‹ŠÔ‹——£‚ÉA‘¾‚³‚ğ _lineThickness ‚Éİ’è
-        rt.sizeDelta = new Vector2(Vector2.Distance(p0, p1), _lineThickness);
+        UpdateSegmentTransform(go.transform, from, to);
 
-        // from¨to •ûŒü‚ÌŠp“x‚ğŒvZ‚µ‚Ä‰ñ“]“K—p
-        float angle = Mathf.Atan2(p1.y - p0.y, p1.x - p0.x) * Mathf.Rad2Deg;
-        rt.rotation = Quaternion.Euler(0, 0, angle);
+        if (go.TryGetComponent<Renderer>(out var renderer))
+            renderer.material.color = color;
+
+        if (isHover)
+            _hoverLines[(from, to)] = go;
+        else
+            _fixedLines[(from, to)] = go;
+
+        return go;
+    }
+
+    /// <summary>
+    /// ç·šã®Transformã‚’ fromâ†’to ã®ã‚»ãƒ«ã«åˆã‚ã›ã¦èª¿æ•´
+    /// </summary>
+    private void UpdateSegmentTransform(Transform tr, Vector2Int from, Vector2Int to)
+    {
+        Vector3 p0 = CellToWorld(from);
+        Vector3 p1 = CellToWorld(to);
+        Vector3 mid = (p0 + p1) * MIDPOINT_FACTOR;
+
+        tr.position = mid;
+        Vector3 dir = (p1 - p0).normalized;
+
+        // å›è»¢
+        tr.rotation = Quaternion.FromToRotation(Vector3.right, dir) * Quaternion.Euler(0f, 0f, 90f);
+
+        float length = Vector3.Distance(p0, p1);
+        tr.localScale = new Vector3(length * _segmentThinness, _lineThickness, _lineThickness * _segmentThinness * _scaleCompensation);
     }
 }
