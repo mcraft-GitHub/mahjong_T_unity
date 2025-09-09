@@ -205,10 +205,12 @@ public class BoardManager : MonoBehaviour
                 }
             }
 
+            // 次のペアを処理
             chosenPaths.Add(pathArray);
             if (RoutePairsRecursive(pairs, idx + 1, tileOccupied, occupiedPaths, chosenPaths))
                 return true;
 
+            // バックトラック
             chosenPaths.RemoveAt(chosenPaths.Count - 1);
             foreach (var c in occupiedList) occupiedPaths[c.x, c.y] = false;
         }
