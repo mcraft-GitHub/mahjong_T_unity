@@ -1,11 +1,13 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ”Õ–Ê‚É•`‰æ‚³‚ê‚éü‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+/// ç›¤é¢ã«æç”»ã•ã‚Œã‚‹ç·šã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class LineManager : MonoBehaviour
 {
+    private const float MIDPOINT_FACTOR = 0.5f;
+
     [Header("Grid Settings")]
     [SerializeField] public int _gridSize = 8;
     [SerializeField] private float _cellSpacing = 1.1f;
@@ -14,18 +16,20 @@ public class LineManager : MonoBehaviour
     [Header("Line Prefab")]
     [SerializeField] private GameObject _linePrefab;
     [SerializeField] private float _lineThickness = 0.1f;
+    [SerializeField] private float _segmentThinness = 0.5f; 
+    [SerializeField] private float _scaleCompensation = 0.5f;
 
-    // sE—ñ
+    // è¡Œãƒ»åˆ—
     public int _rows = 8;
     public int _columns = 8;
 
-    // ŒÅ’èü‚ÆHoverü‚ğŠÇ—
+    // å›ºå®šç·šã¨Hoverç·šã‚’ç®¡ç†
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _fixedLines = new();
     private readonly HashSet<Vector2Int> _fixedOccupiedCells = new();
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _hoverLines = new();
 
     /// <summary>
-    /// ƒZƒ‹À•W ¨ ƒ[ƒ‹ƒhÀ•W
+    /// ã‚»ãƒ«åº§æ¨™ â†’ ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™
     /// </summary>
     public Vector3 CellToWorld(Vector2Int cell)
     {
@@ -36,7 +40,7 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒXƒNƒŠ[ƒ“À•W ¨ ƒZƒ‹À•W
+    /// ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ â†’ ã‚»ãƒ«åº§æ¨™
     /// </summary>
     public bool ScreenToCell(Vector3 screenPos, out Vector2Int cell)
     {
@@ -56,7 +60,7 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ”Õ–Ê“à‚©‚Ç‚¤‚©
+    /// ç›¤é¢å†…ã‹ã©ã†ã‹
     /// </summary>
     public bool Inside(Vector2Int c)
     {
@@ -64,7 +68,7 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Šm’èü‚ª‚»‚ÌƒZƒ‹‚É‚ ‚é‚©
+    /// ç¢ºå®šç·šãŒãã®ã‚»ãƒ«ã«ã‚ã‚‹ã‹
     /// </summary>
     public bool HasFixedOnCell(Vector2Int cell)
     {
@@ -72,7 +76,7 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Hoverü‚ğ•`‰æ
+    /// Hoverç·šã‚’æç”»
     /// </summary>
     public void DrawHoverPath(List<Vector2Int> path, Color color)
     {
@@ -86,7 +90,7 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Hoverü‚ğ‘SÁ‹
+    /// Hoverç·šã‚’å…¨æ¶ˆå»
     /// </summary>
     public void ClearHoverLines()
     {
@@ -96,7 +100,7 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Hoverü‚ğŠm’èü‚É¸Ši
+    /// Hoverç·šã‚’ç¢ºå®šç·šã«æ˜‡æ ¼
     /// </summary>
     public void CommitHoverPath(List<Vector2Int> path, Color color)
     {
@@ -119,7 +123,7 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ‘S‚Ä‚Ìü‚ğíœ
+    /// å…¨ã¦ã®ç·šã‚’å‰Šé™¤
     /// </summary>
     public void ClearAllLines()
     {
@@ -133,7 +137,7 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// GridÄŒvZ‚É‘Sü‚ğÄ”z’u
+    /// Gridå†è¨ˆç®—æ™‚ã«å…¨ç·šã‚’å†é…ç½®
     /// </summary>
     public void RecalcGrid()
     {
@@ -152,7 +156,7 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// üƒIƒuƒWƒFƒNƒg‚ğ¶¬
+    /// ç·šã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆ
     /// </summary>
     private GameObject PlaceSegment(Vector2Int from, Vector2Int to, Color color, bool isHover)
     {
@@ -175,22 +179,21 @@ public class LineManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ü‚ÌTransform‚ğ from¨to ‚ÌƒZƒ‹‚É‡‚í‚¹‚Ä’²®
+    /// ç·šã®Transformã‚’ fromâ†’to ã®ã‚»ãƒ«ã«åˆã‚ã›ã¦èª¿æ•´
     /// </summary>
     private void UpdateSegmentTransform(Transform tr, Vector2Int from, Vector2Int to)
     {
         Vector3 p0 = CellToWorld(from);
         Vector3 p1 = CellToWorld(to);
-        Vector3 mid = (p0 + p1) * 0.5f;
+        Vector3 mid = (p0 + p1) * MIDPOINT_FACTOR;
 
         tr.position = mid;
         Vector3 dir = (p1 - p0).normalized;
 
-        // ‰ñ“]
+        // å›è»¢
         tr.rotation = Quaternion.FromToRotation(Vector3.right, dir) * Quaternion.Euler(0f, 0f, 90f);
 
         float length = Vector3.Distance(p0, p1);
-        float thinness = 0.5f;
-        tr.localScale = new Vector3(length * thinness, _lineThickness, _lineThickness * thinness * thinness);
+        tr.localScale = new Vector3(length * _segmentThinness, _lineThickness, _lineThickness * _segmentThinness * _scaleCompensation);
     }
 }
