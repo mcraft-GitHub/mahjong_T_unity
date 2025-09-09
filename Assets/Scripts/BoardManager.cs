@@ -266,32 +266,59 @@ public class BoardManager : MonoBehaviour
 
             foreach (var n in neighbors)
             {
-                // 盤面外
-                if (n.x < 0 || n.x >= _gridSize || n.y < 0 || n.y >= _gridSize) continue;
-                if (visited[n.x, n.y]) continue;
-
-                bool isEnd = (n == end);
-                if (!isEnd)
+                if (CanVisit(n, end, tileOccupied, occupiedPaths, visited, cur, maxLen))
                 {
-                    if (tileOccupied[n.x, n.y]) continue;
-                    if (occupiedPaths[n.x, n.y]) continue;
+                    // 再起探索
+                    visited[n.x, n.y] = true;
+                    cur.Add(n);
+                    Dfs(n);
+                    cur.RemoveAt(cur.Count - 1);
+                    visited[n.x, n.y] = false;
                 }
-
-                // 上限オーバーならスキップ
-                int remainingMan = Mathf.Abs(n.x - end.x) + Mathf.Abs(n.y - end.y);
-                if (cur.Count + remainingMan > maxLen + 1) continue;
-
-                // 再起探索
-                visited[n.x, n.y] = true;
-                cur.Add(n);
-                Dfs(n);
-                cur.RemoveAt(cur.Count - 1);
-                visited[n.x, n.y] = false;
             }
         }
 
         Dfs(start);
         return results;
+    }
+
+    /// <summary>
+    /// 再起探索の実行条件処理
+    /// </summary>
+    /// <param name="n"> 判定対象のセル座標 </param>
+    /// <param name="end"> 探索の終点セル座標 </param>
+    /// <param name="tileOccupied"> 盤面上で固定タイルが配置されているかを示すフラグ配列 </param>
+    /// <param name="occupiedPaths"> 既に確定した経路セルを示すフラグ配列 </param>
+    /// <param name="visited"> 今回の探索で既に訪問済みかどうかのフラグ配列 </param>
+    /// <param name="cur"> 現在の探索経路リスト </param>
+    /// <param name="maxLen"> 探索経路の許容最大長 </param>
+    /// <returns></returns>
+    private bool CanVisit(Vector2Int n, Vector2Int end, bool[,] tileOccupied, bool[,] occupiedPaths, bool[,] visited, List<Vector2Int> cur, int maxLen)
+    {
+        // 盤面外
+        if (n.x < 0 || n.x >= _gridSize || n.y < 0 || n.y >= _gridSize)
+            return false;
+
+        // 訪問済み
+        if (visited[n.x, n.y])
+            return false;
+
+        bool isEnd = (n == end);
+        if (!isEnd)
+        {
+            // タイル配置セル・既存の経路セル
+            if (tileOccupied[n.x, n.y])
+                return false;
+            if (occupiedPaths[n.x, n.y])
+                return false;
+        }
+
+        // 上限オーバー判定
+        int remainingMan = Mathf.Abs(n.x - end.x) + Mathf.Abs(n.y - end.y);
+        if (cur.Count + remainingMan > maxLen + 1)
+            return false;
+
+        return true;
     }
 
     /// <summary>
