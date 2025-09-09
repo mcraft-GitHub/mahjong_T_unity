@@ -6,8 +6,6 @@ using UnityEngine;
 /// </summary>
 public class BoardManager : MonoBehaviour
 {
-    [SerializeField] private GameManager _gameManager;
-
     [Header("Game Settings")]
     public int _gridSize = 8;
     public int _maxTileTypes = 6;
