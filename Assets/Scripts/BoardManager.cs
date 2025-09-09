@@ -180,15 +180,16 @@ public class BoardManager : MonoBehaviour
         if (idx >= pairs.Count) return true;
 
         var p = pairs[idx];
-        var candidates = EnumeratePaths(p._pairPlacementA, p._pairPlacementB, tileOccupied, occupiedPaths, MAX_PATHS_PER_PAIR, PATH_SLACK);
+        var cellArray = EnumeratePaths(p._pairPlacementA, p._pairPlacementB, tileOccupied, occupiedPaths, MAX_PATHS_PER_PAIR, PATH_SLACK);
 
-        if (candidates == null || candidates.Count == 0) return false;
+        if (cellArray == null || cellArray.Count == 0) return false;
 
-        foreach (var pathArray in candidates)
+        for (var x = 0; x < cellArray.Count; x++)
         {
             var occupiedList = new List<Vector2Int>();
-            foreach (var cell in pathArray)
+            for (var y = 0; y < cellArray[x].Count; y++)
             {
+                var cell = cellArray[x][y];
                 if (cell == p._pairPlacementA || cell == p._pairPlacementB) continue;
                 if (!occupiedPaths[cell.x, cell.y])
                 {
@@ -198,14 +199,16 @@ public class BoardManager : MonoBehaviour
             }
 
             // 次のペアを処理
-            chosenPaths.Add(pathArray);
+            chosenPaths.Add(cellArray[x]);
             if (RoutePairsRecursive(pairs, idx + 1, tileOccupied, occupiedPaths, chosenPaths))
                 return true;
 
             // バックトラック
             chosenPaths.RemoveAt(chosenPaths.Count - 1);
-            foreach (var c in occupiedList) occupiedPaths[c.x, c.y] = false;
+            foreach (var c in occupiedList)
+                occupiedPaths[c.x, c.y] = false;
         }
+
 
         return false;
     }
