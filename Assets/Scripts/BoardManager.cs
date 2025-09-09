@@ -192,10 +192,10 @@ public class BoardManager : MonoBehaviour
 
         if (candidates == null || candidates.Count == 0) return false;
 
-        foreach (var path in candidates)
+        foreach (var pathArray in candidates)
         {
             var occupiedList = new List<Vector2Int>();
-            foreach (var cell in path)
+            foreach (var cell in pathArray)
             {
                 if (cell == p._pairPlacementA || cell == p._pairPlacementB) continue;
                 if (!occupiedPaths[cell.x, cell.y])
@@ -205,7 +205,7 @@ public class BoardManager : MonoBehaviour
                 }
             }
 
-            chosenPaths.Add(path);
+            chosenPaths.Add(pathArray);
             if (RoutePairsRecursive(pairs, idx + 1, tileOccupied, occupiedPaths, chosenPaths))
                 return true;
 
