@@ -40,7 +40,9 @@ public class BoardManager : MonoBehaviour
             foreach (var tile in _tiles)
             {
                 if (tile != null && tile.gameObject != null)
+                {
                     Destroy(tile.gameObject);
+                }
             }
         }
 
