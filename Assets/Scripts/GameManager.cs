@@ -1,12 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 /// <summary>
-/// GameScene ‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+/// GameScene ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class GameManager : MonoBehaviour
 {
@@ -18,15 +14,24 @@ public class GameManager : MonoBehaviour
     private int _matchedPairs = 0;
     private bool _gameActive = false;
 
-    // ƒhƒ‰ƒbƒO’†‚ÌŒo˜H
+    // ãƒ‰ãƒ©ãƒƒã‚°ä¸­ã®çµŒè·¯
     private readonly List<Vector2Int> _hoverPath = new();
     private bool _isDragging = false;
     private Color _dragColor = new Color(0.2f, 2.0f, 1f, 1f);
-    // Šm’è(Ô)
+    // ç¢ºå®š(èµ¤)
     private Color _fixedColor = new Color(2.0f, 0.0f, 0.0f, 1f);
 
     private List<Tile> _selectedTiles = new();
     public int _selectedTilesCount => _selectedTiles.Count;
+
+    private void Awake()
+    {
+        _boardManager.OnSceneChangeRequest += () =>
+        {
+            _uiManager.SetRestartButtonInteractable(false);
+            _fadeControl.BeginFadeToScene("TitleScene");
+        };
+    }
 
     void Start()
     {
@@ -42,22 +47,22 @@ public class GameManager : MonoBehaviour
     {
         if (!_gameActive || _lineManager == null) return;
 
-        // ƒ^ƒCƒ‹‚ª1‚Â‚¾‚¯‘I‘ğ‚³‚ê‚Ä‚¢‚éê‡‚Éƒhƒ‰ƒbƒO‘€ì‚ğ‹–‰Â
+        // ã‚¿ã‚¤ãƒ«ãŒ1ã¤ã ã‘é¸æŠã•ã‚Œã¦ã„ã‚‹å ´åˆã«ãƒ‰ãƒ©ãƒƒã‚°æ“ä½œã‚’è¨±å¯
         if (_selectedTiles.Count == 1)
         {
             var startTile = _selectedTiles[0];
             var startCell = new Vector2Int(startTile._row, startTile._col);
 
-            // ƒhƒ‰ƒbƒOŠJn
+            // ãƒ‰ãƒ©ãƒƒã‚°é–‹å§‹
             if (!_isDragging && Input.GetMouseButtonDown(0))
             {
-                // ƒpƒX‚Ì‰Šú‰»
+                // ãƒ‘ã‚¹ã®åˆæœŸåŒ–
                 _hoverPath.Clear();
                 _hoverPath.Add(startCell);
                 _isDragging = true;
                 _lineManager.DrawHoverPath(_hoverPath, _dragColor);
             }
-            // L‚Î‚·(ƒhƒ‰ƒbƒO’†)
+            // ä¼¸ã°ã™(ãƒ‰ãƒ©ãƒƒã‚°ä¸­)
             if (_isDragging && Input.GetMouseButton(0))
             {
                 if (_lineManager.ScreenToCell(Input.mousePosition, out var cell))
@@ -65,7 +70,7 @@ public class GameManager : MonoBehaviour
                     TryExtendOrBacktrack(cell, startTile);
                 }
             }
-            // I—¹(ˆ—Šm’è)
+            // çµ‚äº†(å‡¦ç†ç¢ºå®š)
             if (_isDragging && Input.GetMouseButtonUp(0))
             {
                 FinishDrag(startTile);
@@ -73,7 +78,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // ‘I‘ğ‚ª–³‚¢E2‚ÂˆÈã‚È‚çƒhƒ‰ƒbƒO–³Œø
+            // é¸æŠãŒç„¡ã„ãƒ»2ã¤ä»¥ä¸Šãªã‚‰ãƒ‰ãƒ©ãƒƒã‚°ç„¡åŠ¹
             if (_isDragging)
             {
                 _isDragging = false;
@@ -84,10 +89,10 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒhƒ‰ƒbƒN’†‚Ìˆ—(Œo˜H‚Ì‰„’·,Œo˜H‚ğ–ß‚éˆ—)
+    /// ãƒ‰ãƒ©ãƒƒã‚¯ä¸­ã®å‡¦ç†(çµŒè·¯ã®å»¶é•·,çµŒè·¯ã‚’æˆ»ã‚‹å‡¦ç†)
     /// </summary>
-    /// <param name="cell"> Œ»İƒJ[ƒ\ƒ‹‚Ì‚ ‚éƒZƒ‹À•W </param>
-    /// <param name="startTile"> ƒhƒ‰ƒbƒNŠJnƒZƒ‹ </param>
+    /// <param name="cell"> ç¾åœ¨ã‚«ãƒ¼ã‚½ãƒ«ã®ã‚ã‚‹ã‚»ãƒ«åº§æ¨™ </param>
+    /// <param name="startTile"> ãƒ‰ãƒ©ãƒƒã‚¯é–‹å§‹ã‚»ãƒ« </param>
     private void TryExtendOrBacktrack(Vector2Int cell, Tile startTile)
     {
         if (_hoverPath.Count == 0) return;
@@ -95,7 +100,7 @@ public class GameManager : MonoBehaviour
         var last = _hoverPath[_hoverPath.Count - 1];
         if (cell == last) return;
 
-        // 1‚Â–ß‚é
+        // 1ã¤æˆ»ã‚‹
         if (_hoverPath.Count >= 2 && cell == _hoverPath[_hoverPath.Count - 2])
         {
             _hoverPath.RemoveAt(_hoverPath.Count - 1);
@@ -103,26 +108,26 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // ‹ßÚ‚Ì‚İ‹–‰Â
+        // è¿‘æ¥æ™‚ã®ã¿è¨±å¯
         if (!IsAdjacent(last, cell)) return;
 
-        // Šù‚ÉŠm’èü‚ª’Ê‚Á‚Ä‚¢‚éƒZƒ‹•s‰Â
+        // æ—¢ã«ç¢ºå®šç·šãŒé€šã£ã¦ã„ã‚‹ã‚»ãƒ«ä¸å¯
         if (_lineManager.HasFixedOnCell(cell)) return;
 
-        // Šù‚É©•ª‚Ìƒhƒ‰ƒbƒOŒo˜H‚Å’Ê‚Á‚Ä‚¢‚éƒZƒ‹•s‰Â
+        // æ—¢ã«è‡ªåˆ†ã®ãƒ‰ãƒ©ãƒƒã‚°çµŒè·¯ã§é€šã£ã¦ã„ã‚‹ã‚»ãƒ«ä¸å¯
         for (int i = 0; i < _hoverPath.Count - 1; i++)
             if (_hoverPath[i] == cell) return;
 
-        // ƒ^ƒCƒ‹‚Ì‘¶İ”»’è
+        // ã‚¿ã‚¤ãƒ«ã®å­˜åœ¨åˆ¤å®š
         Tile t = _boardManager.TileAt(cell);
         bool isStart = (cell.x == startTile._row && cell.y == startTile._col);
 
         if (t != null && !isStart)
         {
-            // ƒ}ƒbƒ`Œó•â or ƒuƒƒbƒN
+            // ãƒãƒƒãƒå€™è£œ or ãƒ–ãƒ­ãƒƒã‚¯
             if (!t._isMatched && t._type == startTile._type)
             {
-                // I“_‚Í‰Â
+                // çµ‚ç‚¹ã¯å¯
                 _hoverPath.Add(cell);
                 _lineManager.DrawHoverPath(_hoverPath, _dragColor);
                 FinishDrag(startTile);
@@ -134,16 +139,16 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // ‹ó‚«ƒZƒ‹‚È‚Ì‚Å‰„’·
+        // ç©ºãã‚»ãƒ«ãªã®ã§å»¶é•·
         _hoverPath.Add(cell);
         _lineManager.DrawHoverPath(_hoverPath, _dragColor);
     }
 
     /// <summary>
-    /// w’è‚µ‚½ƒ^ƒCƒ‹‚ª—×‚É‚ ‚é‚©
+    /// æŒ‡å®šã—ãŸã‚¿ã‚¤ãƒ«ãŒéš£ã«ã‚ã‚‹ã‹
     /// </summary>
-    /// <param name="a"> ƒZƒ‹AÀ•W </param>
-    /// <param name="b"> ƒZƒ‹BÀ•W </param>
+    /// <param name="a"> ã‚»ãƒ«Aåº§æ¨™ </param>
+    /// <param name="b"> ã‚»ãƒ«Båº§æ¨™ </param>
     /// <returns></returns>
     private static bool IsAdjacent(Vector2Int a, Vector2Int b)
     {
@@ -153,9 +158,9 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒhƒ‰ƒbƒN‘€ìI—¹Aƒ}ƒbƒ`¬Œ÷,¸”s”»’è
+    /// ãƒ‰ãƒ©ãƒƒã‚¯æ“ä½œçµ‚äº†æ™‚ã€ãƒãƒƒãƒæˆåŠŸ,å¤±æ•—åˆ¤å®š
     /// </summary>
-    /// <param name="startTile"> ƒhƒ‰ƒbƒNŠJnƒ^ƒCƒ‹ </param>
+    /// <param name="startTile"> ãƒ‰ãƒ©ãƒƒã‚¯é–‹å§‹ã‚¿ã‚¤ãƒ« </param>
     private void FinishDrag(Tile startTile)
     {
         _isDragging = false;
@@ -170,7 +175,7 @@ public class GameManager : MonoBehaviour
         var endCell = _hoverPath[_hoverPath.Count - 1];
         var endTile = _boardManager.TileAt(endCell);
 
-        // “¯íƒ^ƒCƒ‹‚È‚çŠm’è
+        // åŒç¨®ã‚¿ã‚¤ãƒ«ãªã‚‰ç¢ºå®š
         if (endTile != null && !endTile._isMatched && endTile != startTile && endTile._type == startTile._type)
         {
             ConfirmMatch(_hoverPath);
@@ -179,16 +184,16 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // ¸”sFü‚ğÁ‚·
+            // å¤±æ•—ï¼šç·šã‚’æ¶ˆã™
             _lineManager.ClearHoverLines();
             _hoverPath.Clear();
         }
     }
 
     /// <summary>
-    /// Œo˜H‚ª³‚µ‚­“¯í‚ğŒ‹‚ñ‚¾‚Ì‚İŒÄ‚Î‚ê‚é
+    /// çµŒè·¯ãŒæ­£ã—ãåŒç¨®ã‚’çµã‚“ã æ™‚ã®ã¿å‘¼ã°ã‚Œã‚‹
     /// </summary>
-    /// <param name="path"> Œo˜HƒZƒ‹—ñ </param>
+    /// <param name="path"> çµŒè·¯ã‚»ãƒ«åˆ— </param>
     private void ConfirmMatch(List<Vector2Int> path)
     {
         if (path == null || path.Count < 2) return;
@@ -199,11 +204,11 @@ public class GameManager : MonoBehaviour
         if (first._isMatched || last._isMatched) return;
         if (first._type != last._type) return;
 
-        // ƒ^ƒCƒ‹Šm’è
+        // ã‚¿ã‚¤ãƒ«ç¢ºå®š
         first.Match();
         last.Match();
 
-        // ü‚ğŠm’è
+        // ç·šã‚’ç¢ºå®š
         _lineManager.CommitHoverPath(path, _fixedColor);
 
         _matchedPairs++;
@@ -217,7 +222,7 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ”Õ–Ê‚ÌƒŠƒZƒbƒg
+    /// ç›¤é¢ã®ãƒªã‚»ãƒƒãƒˆ
     /// </summary>
     public void StartNewGame()
     {
@@ -233,14 +238,14 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒNƒŠƒbƒN‚Ìˆ—
+    /// ã‚¯ãƒªãƒƒã‚¯æ™‚ã®å‡¦ç†
     /// </summary>
     /// <param name="tile"></param>
     public void OnTileClicked(Tile tile)
     {
         if (!_gameActive || tile == null || tile._isMatched) return;
 
-        // ‘I‘ğ‚ğ‰ğœ‚µ‚Ä1‚Â‘I‘ğ
+        // é¸æŠã‚’è§£é™¤ã—ã¦1ã¤é¸æŠ
         foreach (var t in _selectedTiles)
             t.Deselect();
         _selectedTiles.Clear();
