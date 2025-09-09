@@ -21,9 +21,10 @@ public class BoardManager : MonoBehaviour
     private int _totalPairs = 0;
 
     private System.Random _rand = new System.Random();
-    private readonly int _maxPathsPerPair = 40;
-    private readonly int _maxPlacementAttempts = 800;
-    private readonly int _pathSlack = 6;
+
+    readonly int MAX_PATHS_PER_PAIR = 40;
+    readonly int MAX_PLACEMENT_ATTEMPTS = 800;
+    readonly int PATH_SLACK = 6;
 
     /// <summary>
     /// ゲームの盤面をリセット
@@ -63,7 +64,7 @@ public class BoardManager : MonoBehaviour
         Shuffle(prefabPool);
         prefabPool = prefabPool.GetRange(0, typeCount);
 
-        for (var attempt = 0; attempt < _maxPlacementAttempts; attempt++)
+        for (var attempt = 0; attempt < MAX_PLACEMENT_ATTEMPTS; attempt++)
         {
             // 盤面セルリスト
             List<Vector2Int> allCells = new List<Vector2Int>();
@@ -186,7 +187,7 @@ public class BoardManager : MonoBehaviour
         if (idx >= pairs.Count) return true;
 
         var p = pairs[idx];
-        var candidates = EnumeratePaths(p._pairPlacementA, p._pairPlacementB, tileOccupied, occupiedPaths, _maxPathsPerPair, _pathSlack);
+        var candidates = EnumeratePaths(p._pairPlacementA, p._pairPlacementB, tileOccupied, occupiedPaths, MAX_PATHS_PER_PAIR, PATH_SLACK);
 
         if (candidates == null || candidates.Count == 0) return false;
 
