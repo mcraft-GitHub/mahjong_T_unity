@@ -66,12 +66,12 @@ public class BoardManager : MonoBehaviour
         prefabPool = prefabPool.GetRange(0, typeCount);
 
         bool success = false;
-        for (int attempt = 0; attempt < _maxPlacementAttempts; attempt++)
+        for (var attempt = 0; attempt < _maxPlacementAttempts; attempt++)
         {
             // 盤面セルリスト
             List<Vector2Int> allCells = new List<Vector2Int>();
-            for (int x = 0; x < _gridSize; x++)
-                for (int y = 0; y < _gridSize; y++)
+            for (var x = 0; x < _gridSize; x++)
+                for (var y = 0; y < _gridSize; y++)
                     allCells.Add(new Vector2Int(x, y));
             Shuffle(allCells);
 
@@ -80,7 +80,7 @@ public class BoardManager : MonoBehaviour
             // ランダムにペアにする
             Shuffle(chosen);
             List<PairPlacement> pairs = new List<PairPlacement>();
-            for (int i = 0; i < typeCount; i++)
+            for (var i = 0; i < typeCount; i++)
             {
                 Vector2Int a = chosen[i * 2];
                 Vector2Int b = chosen[i * 2 + 1];
@@ -110,13 +110,13 @@ public class BoardManager : MonoBehaviour
     private void FallbackPlace(List<GameObject> types)
     {
         List<Vector2Int> allCells = new List<Vector2Int>();
-        for (int x = 0; x < _gridSize; x++)
-            for (int y = 0; y < _gridSize; y++)
+        for (var x = 0; x < _gridSize; x++)
+            for (var y = 0; y < _gridSize; y++)
                 allCells.Add(new Vector2Int(x, y));
         Shuffle(allCells);
         int idx = 0;
         _tiles = new Tile[_gridSize, _gridSize];
-        for (int i = 0; i < types.Count; i++)
+        for (var i = 0; i < types.Count; i++)
         {
             PlaceTile(allCells[idx++], $"Tile{i}", types[i]);
             PlaceTile(allCells[idx++], $"Tile{i}", types[i + 1]);
@@ -132,7 +132,7 @@ public class BoardManager : MonoBehaviour
         // 盤面のタイル配列を初期化
         _tiles = new Tile[_gridSize, _gridSize];
 
-        for (int i = 0; i < pairs.Count; i++)
+        for (var i = 0; i < pairs.Count; i++)
         {
             var p = pairs[i];
             GameObject prefab = _tilePrefabs[i % _tilePrefabs.Count];
@@ -352,7 +352,7 @@ public class BoardManager : MonoBehaviour
     /// <param name="list"></param>
     private void Shuffle<T>(List<T> list)
     {
-        for (int i = 0; i < list.Count; i++)
+        for (var i = 0; i < list.Count; i++)
         {
             int j = _rand.Next(i, list.Count);
             (list[i], list[j]) = (list[j], list[i]);
