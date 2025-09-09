@@ -25,9 +25,18 @@ public class BoardManager : MonoBehaviour
 
     private System.Random _rand = new System.Random();
 
-    readonly int MAX_PATHS_PER_PAIR = 40;
-    readonly int MAX_PLACEMENT_ATTEMPTS = 800;
-    readonly int PATH_SLACK = 6;
+    static readonly int MAX_PATHS_PER_PAIR = 40;
+    static readonly int MAX_PLACEMENT_ATTEMPTS = 800;
+    static readonly int PATH_SLACK = 6;
+
+    // 探索方向(上下左右)
+    static readonly Vector2Int[] DIRS = 
+    {
+        new Vector2Int(1, 0),
+        new Vector2Int(-1, 0),
+        new Vector2Int(0, 1),
+        new Vector2Int(0, -1)
+    };
 
     /// <summary>
     /// ゲームの盤面をリセット
@@ -244,17 +253,9 @@ public class BoardManager : MonoBehaviour
                 return;
             }
 
-            // 探索方向(上下左右)
-            Vector2Int[] dirs = new Vector2Int[]
-            {
-                new Vector2Int(1, 0),
-                new Vector2Int(-1, 0),
-                new Vector2Int(0, 1),
-                new Vector2Int(0, -1)
-            };
             // 近い順に並び変えて探索(ヒューリスティック)
             var neighbors = new List<Vector2Int>();
-            foreach (var d in dirs)
+            foreach (var d in DIRS)
                 neighbors.Add(node + d);
 
             neighbors.Sort((a, b) => (Mathf.Abs(a.x - end.x) + Mathf.Abs(a.y - end.y)).CompareTo(Mathf.Abs(b.x - end.x) + Mathf.Abs(b.y - end.y)));
