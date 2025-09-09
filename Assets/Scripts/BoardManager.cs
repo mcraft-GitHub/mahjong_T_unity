@@ -249,25 +249,39 @@ public class BoardManager : MonoBehaviour
                 return;
             }
 
-            Vector2Int[] dirs = new Vector2Int[] { new Vector2Int(1, 0), new Vector2Int(-1, 0), new Vector2Int(0, 1), new Vector2Int(0, -1) };
+            // 探索方向(上下左右)
+            Vector2Int[] dirs = new Vector2Int[]
+            {
+                new Vector2Int(1, 0),
+                new Vector2Int(-1, 0),
+                new Vector2Int(0, 1),
+                new Vector2Int(0, -1)
+            };
+            // 近い順に並び変えて探索(ヒューリスティック)
             var neighbors = new List<Vector2Int>();
-            foreach (var d in dirs) neighbors.Add(node + d);
+            foreach (var d in dirs)
+                neighbors.Add(node + d);
+
             neighbors.Sort((a, b) => (Mathf.Abs(a.x - end.x) + Mathf.Abs(a.y - end.y)).CompareTo(Mathf.Abs(b.x - end.x) + Mathf.Abs(b.y - end.y)));
 
             foreach (var n in neighbors)
             {
-                if (results.Count >= maxPaths) break;
+                // 盤面外
                 if (n.x < 0 || n.x >= _gridSize || n.y < 0 || n.y >= _gridSize) continue;
                 if (visited[n.x, n.y]) continue;
+
                 bool isEnd = (n == end);
                 if (!isEnd)
                 {
                     if (tileOccupied[n.x, n.y]) continue;
                     if (occupiedPaths[n.x, n.y]) continue;
                 }
+
+                // 上限オーバーならスキップ
                 int remainingMan = Mathf.Abs(n.x - end.x) + Mathf.Abs(n.y - end.y);
                 if (cur.Count + remainingMan > maxLen + 1) continue;
 
+                // 再起探索
                 visited[n.x, n.y] = true;
                 cur.Add(n);
                 Dfs(n);
