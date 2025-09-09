@@ -35,9 +35,11 @@ public class BoardManager : MonoBehaviour
         ClearGrid();
         if (_tiles != null)
         {
-            foreach (var t in _tiles)
-                if (t != null && t.gameObject != null)
-                    Destroy(t.gameObject);
+            foreach (var tile in _tiles)
+            {
+                if (tile != null && tile.gameObject != null)
+                    Destroy(tile.gameObject);
+            }
         }
 
         _tiles = new Tile[_gridSize, _gridSize];
