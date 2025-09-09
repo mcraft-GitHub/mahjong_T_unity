@@ -96,13 +96,13 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        FallbackPlace(prefabPool);
+        ForcedRandomPlacement(prefabPool);
     }
 
     /// <summary>
-    /// 経路を無視してランダムにペアを配置するフォールバック処理
+    /// 経路を無視してランダムにペアを配置する処理
     /// </summary>
-    private void FallbackPlace(List<GameObject> types)
+    private void ForcedRandomPlacement(List<GameObject> types)
     {
         List<Vector2Int> allCells = new List<Vector2Int>();
         for (var x = 0; x < _gridSize; x++)
