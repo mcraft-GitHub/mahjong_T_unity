@@ -17,9 +17,9 @@ public class GameManager : MonoBehaviour
     // ドラッグ中の経路
     private readonly List<Vector2Int> _hoverPath = new();
     private bool _isDragging = false;
-    private Color _dragColor = new Color(0.2f, 2.0f, 1f, 1f);
+    private static readonly Color DRAG_COLOR = new Color(0.2f, 2.0f, 1f, 1f);
     // 確定(赤)
-    private Color _fixedColor = new Color(2.0f, 0.0f, 0.0f, 1f);
+    private static readonly Color FIXED_COLOR = new Color(2.0f, 0.0f, 0.0f, 1f);
 
     private List<Tile> _selectedTiles = new();
     public int _selectedTilesCount => _selectedTiles.Count;
@@ -60,7 +60,7 @@ public class GameManager : MonoBehaviour
                 _hoverPath.Clear();
                 _hoverPath.Add(startCell);
                 _isDragging = true;
-                _lineManager.DrawHoverPath(_hoverPath, _dragColor);
+                _lineManager.DrawHoverPath(_hoverPath, DRAG_COLOR);
             }
             // 伸ばす(ドラッグ中)
             if (_isDragging && Input.GetMouseButton(0))
@@ -104,7 +104,7 @@ public class GameManager : MonoBehaviour
         if (_hoverPath.Count >= 2 && cell == _hoverPath[_hoverPath.Count - 2])
         {
             _hoverPath.RemoveAt(_hoverPath.Count - 1);
-            _lineManager.DrawHoverPath(_hoverPath, _dragColor);
+            _lineManager.DrawHoverPath(_hoverPath, DRAG_COLOR);
             return;
         }
 
@@ -129,7 +129,7 @@ public class GameManager : MonoBehaviour
             {
                 // 終点は可
                 _hoverPath.Add(cell);
-                _lineManager.DrawHoverPath(_hoverPath, _dragColor);
+                _lineManager.DrawHoverPath(_hoverPath, DRAG_COLOR);
                 FinishDrag(startTile);
                 return;
             }
@@ -141,7 +141,7 @@ public class GameManager : MonoBehaviour
 
         // 空きセルなので延長
         _hoverPath.Add(cell);
-        _lineManager.DrawHoverPath(_hoverPath, _dragColor);
+        _lineManager.DrawHoverPath(_hoverPath, DRAG_COLOR);
     }
 
     /// <summary>
@@ -209,7 +209,7 @@ public class GameManager : MonoBehaviour
         last.Match();
 
         // 線を確定
-        _lineManager.CommitHoverPath(path, _fixedColor);
+        _lineManager.CommitHoverPath(path, FIXED_COLOR);
 
         _matchedPairs++;
         _uiManager.UpdateUI(_boardManager.GetTotalPairs(), _matchedPairs);
