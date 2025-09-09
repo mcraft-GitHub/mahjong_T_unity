@@ -65,7 +65,6 @@ public class BoardManager : MonoBehaviour
         Shuffle(prefabPool);
         prefabPool = prefabPool.GetRange(0, typeCount);
 
-        bool success = false;
         for (var attempt = 0; attempt < _maxPlacementAttempts; attempt++)
         {
             // 盤面セルリスト
@@ -93,15 +92,11 @@ public class BoardManager : MonoBehaviour
                 // 成功：UI に反映して完了
                 PlaceTilesFromPairs(pairs, prefabPool);
                 _totalPairs = typeCount;
-                success = true;
-                break;
+                return;
             }
         }
 
-        if (!success)
-        {
-            FallbackPlace(prefabPool);
-        }
+        FallbackPlace(prefabPool);
     }
 
     /// <summary>
