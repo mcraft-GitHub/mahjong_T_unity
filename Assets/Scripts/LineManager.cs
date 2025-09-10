@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -27,6 +28,7 @@ public class LineManager : MonoBehaviour
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _fixedLines = new();
     private readonly HashSet<Vector2Int> _fixedOccupiedCells = new();
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _hoverLines = new();
+    private readonly Dictionary<GameObject, List<Vector2Int>> _fixedPathByLine = new();
 
     /// <summary>
     /// セル座標 → ワールド座標
@@ -104,21 +106,26 @@ public class LineManager : MonoBehaviour
     /// </summary>
     public void CommitHoverPath(List<Vector2Int> path, Color color)
     {
-        if (path == null || path.Count < 2)
-        {
-            ClearHoverLines();
-            return;
-        }
+        if (path == null || path.Count < 2) return;
 
         ClearHoverLines();
+        List<GameObject> lineObjs = new();
+
         for (int i = 0; i < path.Count - 1; i++)
         {
-            PlaceSegment(path[i], path[i + 1], color, false);
+            var seg = PlaceSegment(path[i], path[i + 1], color, false);
+            lineObjs.Add(seg);
         }
 
         foreach (var c in path)
         {
             _fixedOccupiedCells.Add(c);
+        }
+
+        // 経路を各線に関連付け
+        foreach (var go in lineObjs)
+        {
+            _fixedPathByLine[go] = new List<Vector2Int>(path);
         }
     }
 
@@ -170,6 +177,10 @@ public class LineManager : MonoBehaviour
         if (go.TryGetComponent<Renderer>(out var renderer))
             renderer.material.color = color;
 
+        // 初期化
+        var handler = go.GetComponent<LineClickHandler>();
+        if (handler == null) handler = go.AddComponent<LineClickHandler>();
+
         if (isHover)
             _hoverLines[(from, to)] = go;
         else
@@ -195,5 +206,58 @@ public class LineManager : MonoBehaviour
 
         float length = Vector3.Distance(p0, p1);
         tr.localScale = new Vector3(length * _segmentThinness, _lineThickness, _lineThickness * _segmentThinness * _scaleCompensation);
+
+        if (tr.TryGetComponent<BoxCollider>(out var bc))
+        {
+            bc.center = Vector3.zero;
+        }
+    }
+
+    /// <summary>
+    /// 線がクリックされた時の処理
+    /// </summary>
+    /// <param name="lineObj"></param>
+    /// <param name="gm"></param>
+    public void NotifyLineClicked(GameObject lineObj, GameManager gm)
+    {
+        if (!_fixedPathByLine.TryGetValue(lineObj, out var path)) return;
+
+        // 経路の線オブジェクトを全て探す
+        var toRemove = new List<GameObject>();
+
+        foreach (var kv in _fixedPathByLine)
+        {
+            // 同じペアの線
+            if (kv.Value.SequenceEqual(path))
+            {
+                toRemove.Add(kv.Key);
+            }
+        }
+
+        // 経路の線を全削除
+        foreach (var go in toRemove)
+        {
+            if (_fixedLines.ContainsValue(go))
+            {
+                Destroy(go);
+            }
+            _fixedPathByLine.Remove(go);
+        }
+
+        // 占有セルを非占有に
+        foreach (var c in path)
+            _fixedOccupiedCells.Remove(c);
+
+        // GameManagerに通知・タイルをUnmatch
+        gm.UndoConfirmMatch(path);
+    }
+
+    public void SetAllLinesColliderActive(bool value)
+    {
+        LineClickHandler[] lines = FindObjectsByType<LineClickHandler>(FindObjectsSortMode.None);
+        foreach (var line in lines)
+        {
+            line.SetColliderActive(value);
+        }
     }
 }

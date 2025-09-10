@@ -1,7 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
-/// ”Õã‚Ì1ƒ}ƒX‚ğ•\‚·ƒ^ƒCƒ‹‚ÌƒNƒ‰ƒX
+/// ç›¤ä¸Šã®1ãƒã‚¹ã‚’è¡¨ã™ã‚¿ã‚¤ãƒ«ã®ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class Tile : MonoBehaviour
 {
@@ -25,8 +25,6 @@ public class Tile : MonoBehaviour
         get;
         private set;
     } = false;
-
-    private bool _isSelected = false;
 
     private Renderer _renderer;
     private Collider _collider;
@@ -53,49 +51,45 @@ public class Tile : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒ^ƒCƒ‹‰Šú‰»
+    /// ã‚¿ã‚¤ãƒ«åˆæœŸåŒ–
     /// </summary>
-    /// <param name="row"> s </param>
-    /// <param name="col"> —ñ </param>
-    /// <param name="type"> í—Ş </param>
+    /// <param name="row"> è¡Œ </param>
+    /// <param name="col"> åˆ— </param>
+    /// <param name="type"> ç¨®é¡ </param>
     public void Setup(int row, int col, string type)
     {
         _row = row;
         _col = col;
         _type = type;
         _isMatched = false;
-        _isSelected = false;
         if (_collider != null) _collider.enabled = true;
         ApplyColor(_originalColor);
     }
 
     /// <summary>
-    /// ƒ^ƒCƒ‹‘I‘ğ‚Ì•\¦•ÏX
+    /// ã‚¿ã‚¤ãƒ«é¸æŠæ™‚ã®è¡¨ç¤ºå¤‰æ›´
     /// </summary>
     public void Select()
     {
         if (_isMatched) return;
-        _isSelected = true;
         ApplyColor(_selectedColor);
     }
 
     /// <summary>
-    /// ‘I‘ğ‰ğœ‚Ì•\¦•ÏX
+    /// é¸æŠè§£é™¤æ™‚ã®è¡¨ç¤ºå¤‰æ›´
     /// </summary>
     public void Deselect()
     {
         if (_isMatched) return;
-        _isSelected = false;
         ApplyColor(_originalColor);
     }
 
     /// <summary>
-    /// ƒ^ƒCƒ‹‚ªƒ}ƒbƒ`‚µ‚½‚Ìˆ—
+    /// ã‚¿ã‚¤ãƒ«ãŒãƒãƒƒãƒã—ãŸæ™‚ã®å‡¦ç†
     /// </summary>
     public void Match()
     {
         _isMatched = true;
-        _isSelected = false;
         ApplyColor(_matchedColor);
         if (_collider != null) _collider.enabled = false;
 
@@ -103,13 +97,53 @@ public class Tile : MonoBehaviour
     }
 
     /// <summary>
-    /// F‚Ì“K‰
+    /// ãƒãƒƒãƒçŠ¶æ…‹ã‚’è§£é™¤ã™ã‚‹
     /// </summary>
-    /// <param name="c"> F </param>
+    public void Unmatch()
+    {
+        if (!_isMatched) return;
+
+        _isMatched = false;
+
+        // è¦‹ãŸç›®ãƒ»æ“ä½œã‚’å…ƒã«æˆ»ã™
+        ApplyColor(_originalColor);
+        if (_collider != null)
+        {
+            _collider.enabled = true;
+        }
+
+        // å›è»¢ã®åˆæœŸåŒ–
+        transform.localRotation = Quaternion.identity;
+    }
+
+    /// <summary>
+    /// è‰²ã®é©å¿œ
+    /// </summary>
+    /// <param name="c"> è‰² </param>
     private void ApplyColor(Color c)
     {
         if (_renderer == null) return;
         _mpb.SetColor(_colorPropId, c);
         _renderer.SetPropertyBlock(_mpb);
+    }
+
+    /// <summary>
+    /// ç¢ºå®šçŠ¶æ…‹ã‚’ãƒªã‚»ãƒƒãƒˆ
+    /// </summary>
+    public void ResetState()
+    {
+        _isMatched = false;
+
+        // è‰²ã‚’æˆ»ã™
+        ApplyColor(_originalColor);
+
+        // ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼å¾©æ´»
+        if (_collider != null)
+        {
+            _collider.enabled = true;
+        }
+
+        // å›è»¢ã‚’æˆ»ã™
+        transform.localRotation = Quaternion.identity;
     }
 }
