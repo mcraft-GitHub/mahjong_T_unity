@@ -242,7 +242,7 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 線のリセット
+    /// 線とペア情報のリセット
     /// </summary>
     public void ResetGame()
     {
