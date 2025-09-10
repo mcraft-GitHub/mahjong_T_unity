@@ -127,7 +127,7 @@ public class LineManager : MonoBehaviour
         // 経路を各線に関連付け
         foreach (var lineObj in lineObjs)
         {
-            _fixedPathByLine[gameObject] = new List<Vector2Int>(path);
+            _fixedPathByLine[lineObj] = new List<Vector2Int>(path);
         }
     }
 
@@ -220,9 +220,9 @@ public class LineManager : MonoBehaviour
     /// </summary>
     /// <param name="Object"></param>
     /// <param name="gm"></param>
-    public void NotifyLineClicked(GameObject Object, GameManager gm)
+    public void NotifyLineClicked(GameObject lineObject, GameManager gm)
     {
-        if (!_fixedPathByLine.TryGetValue(Object, out var path)) return;
+        if (!_fixedPathByLine.TryGetValue(lineObject, out var path)) return;
 
         // 経路の線オブジェクトを全て探す
         var toRemove = new List<GameObject>();
