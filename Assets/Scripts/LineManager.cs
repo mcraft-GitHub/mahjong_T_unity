@@ -8,6 +8,8 @@ using UnityEngine;
 public class LineManager : MonoBehaviour
 {
     private const float MIDPOINT_FACTOR = 0.5f;
+    // 経路が繋ぐ為に必要な最低限の点の数
+    private const int MIN_PATH_POINTS = 2;
 
     [Header("Grid Settings")]
     [SerializeField] public int _gridSize = 8;
@@ -106,7 +108,7 @@ public class LineManager : MonoBehaviour
     /// </summary>
     public void CommitHoverPath(List<Vector2Int> path, Color color)
     {
-        if (path == null || path.Count < 2) return;
+        if (path == null || path.Count < MIN_PATH_POINTS) return;
 
         ClearHoverLines();
         List<GameObject> lineObjs = new();
