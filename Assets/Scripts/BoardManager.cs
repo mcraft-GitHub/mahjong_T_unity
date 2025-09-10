@@ -428,6 +428,22 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 全タイルの状態をリセット
+    /// </summary>
+    public void ResetTilesState()
+    {
+        if (_tiles == null) return;
+
+        foreach (var tile in _tiles)
+        {
+            if (tile != null)
+            {
+                tile.ResetState();
+            }
+        }
+    }
+
+    /// <summary>
     /// 全タイルの削除
     /// </summary>
     private void ClearGrid()

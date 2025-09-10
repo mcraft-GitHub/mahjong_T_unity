@@ -1,7 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
-/// ƒŠƒUƒ‹ƒg‚Ì’l‚ğ‚Á‚Ä‚¨‚­ƒNƒ‰ƒX
+/// ãƒªã‚¶ãƒ«ãƒˆã®å€¤ã‚’æŒã£ã¦ãŠãã‚¯ãƒ©ã‚¹
 /// </summary>
 public class GameResultKeeper : MonoBehaviour
 {
@@ -33,7 +33,7 @@ public class GameResultKeeper : MonoBehaviour
     }
 
     /// <summary>
-    /// Œo‰ßŠÔŒvZ—p _startTime ‚Ìİ’è
+    /// çµŒéæ™‚é–“è¨ˆç®—ç”¨ _startTime ã®è¨­å®š
     /// </summary>
     public void StartTime()
     {
@@ -41,8 +41,8 @@ public class GameResultKeeper : MonoBehaviour
     }
 
     /// <summary>
-    /// ÅIŒo‰ßƒ^ƒCƒ€‚ÌŒvZ
-    /// GameScene ‚©‚ç ResultScene ‚Ö‘JˆÚ‚·‚éÛ‚Ég—p
+    /// æœ€çµ‚çµŒéã‚¿ã‚¤ãƒ ã®è¨ˆç®—
+    /// GameScene ã‹ã‚‰ ResultScene ã¸é·ç§»ã™ã‚‹éš›ã«ä½¿ç”¨
     /// </summary>
     public string MakeResultTime()
     {
@@ -55,18 +55,18 @@ public class GameResultKeeper : MonoBehaviour
     }
 
     /// <summary>
-    /// Œo‰ß‚µ‚½•ª”‚ğ“n‚·
+    /// çµŒéã—ãŸåˆ†æ•°ã‚’æ¸¡ã™
     /// </summary>
-    /// <returns> Œo‰ß •ª </returns>
+    /// <returns> çµŒé åˆ† </returns>
     public int GetMinutes()
     {
         return _minutes;
     }
 
     /// <summary>
-    /// Œo‰ß‚µ‚½•b”‚ğ“n‚·
+    /// çµŒéã—ãŸç§’æ•°ã‚’æ¸¡ã™
     /// </summary>
-    /// <returns> Œo‰ß •b </returns>
+    /// <returns> çµŒé ç§’ </returns>
     public int GetSeconds()
     {
         return _seconds;

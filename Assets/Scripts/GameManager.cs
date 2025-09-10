@@ -28,7 +28,6 @@ public class GameManager : MonoBehaviour
     {
         _boardManager.OnSceneChangeRequest += () =>
         {
-            _uiManager.SetRestartButtonInteractable(false);
             _fadeControl.BeginFadeToScene("TitleScene");
         };
     }
@@ -37,8 +36,11 @@ public class GameManager : MonoBehaviour
     {
         _fadeControl.SceneStart();
 
+        if (_uiManager._menuButton != null)
+            _uiManager._menuButton.onClick.AddListener(StartNewGame);
+
         if (_uiManager._restartButton != null)
-            _uiManager._restartButton.onClick.AddListener(StartNewGame);
+            _uiManager._restartButton.onClick.AddListener(ResetLinePair);
 
         StartNewGame();
     }
@@ -215,6 +217,7 @@ public class GameManager : MonoBehaviour
         _uiManager.UpdateUI(_boardManager.GetTotalPairs(), _matchedPairs);
         if (_matchedPairs >= _boardManager.GetTotalPairs())
         {
+            _lineManager.SetAllLinesColliderActive(false);
             _uiManager.SetRestartButtonInteractable(false);
             GameResultKeeper._Instance.MakeResultTime();
             _fadeControl.BeginFadeToScene("ResultScene");
@@ -238,6 +241,22 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 線とペア情報のリセット
+    /// </summary>
+    public void ResetLinePair()
+    {
+        _boardManager.ResetLine();
+        _boardManager.ResetTilesState();
+
+        _matchedPairs = 0;
+        _gameActive = true;
+        _isDragging = false;
+        _hoverPath.Clear();
+        StartCoroutine(_uiManager.UpdateTimer(_gameActive));
+        _uiManager.UpdateUI(_boardManager.GetTotalPairs(), _matchedPairs);
+    }
+
+    /// <summary>
     /// クリック時の処理
     /// </summary>
     /// <param name="tile"></param>
@@ -253,4 +272,27 @@ public class GameManager : MonoBehaviour
         _selectedTiles.Add(tile);
         tile.Select();
     }
+
+    /// <summary>
+    /// マッチ確定を1つ戻す
+    /// </summary>
+    /// <param name="path"></param>
+    public void UndoConfirmMatch(List<Vector2Int> path)
+    {
+        Tile first = _boardManager.TileAt(path[0]);
+        Tile last = _boardManager.TileAt(path[path.Count - 1]);
+
+        if (first != null)
+        {
+            first.Unmatch();
+        }
+        if (last != null)
+        {
+            last.Unmatch();
+        }
+
+        _matchedPairs = Mathf.Max(0, _matchedPairs - 1);
+        _uiManager.UpdateUI(_boardManager.GetTotalPairs(), _matchedPairs);
+    }
+
 }

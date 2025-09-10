@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +11,7 @@ public class UIManager : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] private TMP_Text _pairsLeftText;
     [SerializeField] private TMP_Text _timerText;
+    [SerializeField] public Button _menuButton;
     [SerializeField] public Button _restartButton;
 
 
@@ -39,6 +40,11 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void SetRestartButtonInteractable(bool isInteractable)
     {
+        if(_menuButton != null)
+        {
+            _menuButton.interactable = isInteractable;
+        }
+
         if (_restartButton != null)
         {
             _restartButton.interactable = isInteractable;

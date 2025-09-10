@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -7,6 +8,8 @@ using UnityEngine;
 public class LineManager : MonoBehaviour
 {
     private const float MIDPOINT_FACTOR = 0.5f;
+    // 経路が繋ぐ為に必要な最低限の点の数
+    private const int MIN_PATH_POINTS = 2;
 
     [Header("Grid Settings")]
     [SerializeField] public int _gridSize = 8;
@@ -27,6 +30,7 @@ public class LineManager : MonoBehaviour
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _fixedLines = new();
     private readonly HashSet<Vector2Int> _fixedOccupiedCells = new();
     private readonly Dictionary<(Vector2Int, Vector2Int), GameObject> _hoverLines = new();
+    private readonly Dictionary<GameObject, List<Vector2Int>> _fixedPathByLine = new();
 
     /// <summary>
     /// セル座標 → ワールド座標
@@ -94,8 +98,8 @@ public class LineManager : MonoBehaviour
     /// </summary>
     public void ClearHoverLines()
     {
-        foreach (var go in _hoverLines.Values)
-            Destroy(go);
+        foreach (var lineObj in _hoverLines.Values)
+            Destroy(lineObj);
         _hoverLines.Clear();
     }
 
@@ -104,21 +108,26 @@ public class LineManager : MonoBehaviour
     /// </summary>
     public void CommitHoverPath(List<Vector2Int> path, Color color)
     {
-        if (path == null || path.Count < 2)
-        {
-            ClearHoverLines();
-            return;
-        }
+        if (path == null || path.Count < MIN_PATH_POINTS) return;
 
         ClearHoverLines();
+        List<GameObject> lineObjs = new();
+
         for (int i = 0; i < path.Count - 1; i++)
         {
-            PlaceSegment(path[i], path[i + 1], color, false);
+            var seg = PlaceSegment(path[i], path[i + 1], color, false);
+            lineObjs.Add(seg);
         }
 
-        foreach (var c in path)
+        foreach (var cell in path)
         {
-            _fixedOccupiedCells.Add(c);
+            _fixedOccupiedCells.Add(cell);
+        }
+
+        // 経路を各線に関連付け
+        foreach (var lineObj in lineObjs)
+        {
+            _fixedPathByLine[lineObj] = new List<Vector2Int>(path);
         }
     }
 
@@ -127,10 +136,10 @@ public class LineManager : MonoBehaviour
     /// </summary>
     public void ClearAllLines()
     {
-        foreach (var go in _fixedLines.Values)
-            Destroy(go);
-        foreach (var go in _hoverLines.Values)
-            Destroy(go);
+        foreach (var lineObj in _fixedLines.Values)
+            Destroy(lineObj);
+        foreach (var lineObj in _hoverLines.Values)
+            Destroy(lineObj);
         _fixedLines.Clear();
         _hoverLines.Clear();
         _fixedOccupiedCells.Clear();
@@ -141,17 +150,17 @@ public class LineManager : MonoBehaviour
     /// </summary>
     public void RecalcGrid()
     {
-        foreach (var kv in _fixedLines)
+        foreach (var linePair in _fixedLines)
         {
-            Vector2Int from = kv.Key.Item1;
-            Vector2Int to = kv.Key.Item2;
-            UpdateSegmentTransform(kv.Value.transform, from, to);
+            Vector2Int from = linePair.Key.Item1;
+            Vector2Int to = linePair.Key.Item2;
+            UpdateSegmentTransform(linePair.Value.transform, from, to);
         }
-        foreach (var kv in _hoverLines)
+        foreach (var linePair in _hoverLines)
         {
-            Vector2Int from = kv.Key.Item1;
-            Vector2Int to = kv.Key.Item2;
-            UpdateSegmentTransform(kv.Value.transform, from, to);
+            Vector2Int from = linePair.Key.Item1;
+            Vector2Int to = linePair.Key.Item2;
+            UpdateSegmentTransform(linePair.Value.transform, from, to);
         }
     }
 
@@ -160,22 +169,26 @@ public class LineManager : MonoBehaviour
     /// </summary>
     private GameObject PlaceSegment(Vector2Int from, Vector2Int to, Color color, bool isHover)
     {
-        GameObject go = Instantiate(_linePrefab, _lineContainer);
+        GameObject gameObject = Instantiate(_linePrefab, _lineContainer);
 
         Vector3 p0 = CellToWorld(from);
         Vector3 p1 = CellToWorld(to);
 
-        UpdateSegmentTransform(go.transform, from, to);
+        UpdateSegmentTransform(gameObject.transform, from, to);
 
-        if (go.TryGetComponent<Renderer>(out var renderer))
+        if (gameObject.TryGetComponent<Renderer>(out var renderer))
             renderer.material.color = color;
 
-        if (isHover)
-            _hoverLines[(from, to)] = go;
-        else
-            _fixedLines[(from, to)] = go;
+        // 初期化
+        var handler = gameObject.GetComponent<LineClickHandler>();
+        if (handler == null) handler = gameObject.AddComponent<LineClickHandler>();
 
-        return go;
+        if (isHover)
+            _hoverLines[(from, to)] = gameObject;
+        else
+            _fixedLines[(from, to)] = gameObject;
+
+        return gameObject;
     }
 
     /// <summary>
@@ -195,5 +208,58 @@ public class LineManager : MonoBehaviour
 
         float length = Vector3.Distance(p0, p1);
         tr.localScale = new Vector3(length * _segmentThinness, _lineThickness, _lineThickness * _segmentThinness * _scaleCompensation);
+
+        if (tr.TryGetComponent<BoxCollider>(out var bc))
+        {
+            bc.center = Vector3.zero;
+        }
+    }
+
+    /// <summary>
+    /// 線がクリックされた時の処理
+    /// </summary>
+    /// <param name="Object"></param>
+    /// <param name="gm"></param>
+    public void NotifyLineClicked(GameObject lineObject, GameManager gm)
+    {
+        if (!_fixedPathByLine.TryGetValue(lineObject, out var pathCells)) return;
+
+        // 経路の線オブジェクトを全て探す
+        var toRemove = new List<GameObject>();
+
+        foreach (var linePathPair in _fixedPathByLine)
+        {
+            // 同じペアの線
+            if (linePathPair.Value.SequenceEqual(pathCells))
+            {
+                toRemove.Add(linePathPair.Key);
+            }
+        }
+
+        // 経路の線を全削除
+        foreach (var lineObj in toRemove)
+        {
+            if (_fixedLines.ContainsValue(lineObj))
+            {
+                Destroy(lineObj);
+            }
+            _fixedPathByLine.Remove(lineObj);
+        }
+
+        // 占有セルを非占有に
+        foreach (var cell in pathCells)
+            _fixedOccupiedCells.Remove(cell);
+
+        // GameManagerに通知・タイルをUnmatch
+        gm.UndoConfirmMatch(pathCells);
+    }
+
+    public void SetAllLinesColliderActive(bool value)
+    {
+        LineClickHandler[] lines = FindObjectsByType<LineClickHandler>(FindObjectsSortMode.None);
+        foreach (var line in lines)
+        {
+            line.SetColliderActive(value);
+        }
     }
 }

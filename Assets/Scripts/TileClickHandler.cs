@@ -1,7 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
-/// ƒ}ƒEƒX“ü—Í‚ÌŒŸ’m,ƒ^ƒCƒ‹‘I‘ğEˆ—‚ğs‚¤ƒNƒ‰ƒX
+/// ãƒã‚¦ã‚¹å…¥åŠ›ã®æ¤œçŸ¥,ã‚¿ã‚¤ãƒ«é¸æŠãƒ»å‡¦ç†ã‚’è¡Œã†ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class TileSelector : MonoBehaviour
 {
@@ -13,24 +13,26 @@ public class TileSelector : MonoBehaviour
     {
         GameObject camObj = GameObject.Find("Main Camera");
         _mainCamera = camObj.GetComponent<Camera>();
-        _gameManager = Object.FindAnyObjectByType<GameManager>();
+        _gameManager = FindAnyObjectByType<GameManager>();
     }
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0)) // ¶ƒNƒŠƒbƒN
+        // ã‚¯ãƒªãƒƒã‚¯
+        if (Input.GetMouseButtonDown(0))
         {
             HandleClick();
         }
 
-        if (Input.GetMouseButton(0)) // ƒhƒ‰ƒbƒO
+        // ãƒ‰ãƒ©ãƒƒã‚°
+        if (Input.GetMouseButton(0))
         {
             HandleDrag();
         }
     }
 
     /// <summary>
-    /// ƒNƒŠƒbƒN‚³‚ê‚½ƒ^ƒCƒ‹‚ğæ“¾‚µ,GameManager‚É’Ê’m
+    /// ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸã‚¿ã‚¤ãƒ«ã‚’å–å¾—ã—,GameManagerã«é€šçŸ¥
     /// </summary>
     private void HandleClick()
     {
@@ -42,7 +44,7 @@ public class TileSelector : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒhƒ‰ƒbƒO’†‚Ìƒ^ƒCƒ‹‚ğæ“¾‚µ,GameManager‚É’Ê’m
+    /// ãƒ‰ãƒ©ãƒƒã‚°ä¸­ã®ã‚¿ã‚¤ãƒ«ã‚’å–å¾—ã—,GameManagerã«é€šçŸ¥
     /// </summary>
     private void HandleDrag()
     {
@@ -52,7 +54,7 @@ public class TileSelector : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒhƒ‰ƒbƒN’†AƒJ[ƒ\ƒ‹‰º‚Ìƒ^ƒCƒ‹‚ğæ“¾
+    /// ãƒ‰ãƒ©ãƒƒã‚¯ä¸­ã€ã‚«ãƒ¼ã‚½ãƒ«ä¸‹ã®ã‚¿ã‚¤ãƒ«ã‚’å–å¾—
     /// </summary>
     /// <returns></returns>
     private Tile GetTileUnderMouse()

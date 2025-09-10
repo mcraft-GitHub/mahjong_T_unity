@@ -1,7 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
-/// ƒyƒA‚Æ‚»‚ÌÅ’Z‹——£‚ğ‚Ü‚Æ‚ß‚½\‘¢‘Ì
+/// ãƒšã‚¢ã¨ãã®æœ€çŸ­è·é›¢ã‚’ã¾ã¨ã‚ãŸæ§‹é€ ä½“
 /// </summary>
 public class PairWithDist
 {

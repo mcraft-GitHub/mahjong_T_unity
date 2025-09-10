@@ -1,9 +1,9 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// ƒtƒF[ƒhƒCƒ“EƒtƒF[ƒhƒAƒEƒg‚ğ§Œä‚·‚éƒNƒ‰ƒX
+/// ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³ãƒ»ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆã‚’åˆ¶å¾¡ã™ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class FadeControl : MonoBehaviour
 {
@@ -28,7 +28,7 @@ public class FadeControl : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒtƒF[ƒhƒCƒ“ ƒ‰ƒbƒp[ŠÖ”
+    /// ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³ ãƒ©ãƒƒãƒ‘ãƒ¼é–¢æ•°
     /// </summary>
     public void SceneStart()
     {
@@ -36,7 +36,7 @@ public class FadeControl : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒtƒF[ƒhƒCƒ“
+    /// ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³
     /// </summary>
     /// <returns></returns>
     private IEnumerator FadeInScene()
@@ -54,7 +54,7 @@ public class FadeControl : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒtƒF[ƒhƒAƒEƒg
+    /// ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆ
     /// </summary>
     /// <returns></returns>
     private IEnumerator FadeOutScene()
@@ -72,7 +72,7 @@ public class FadeControl : MonoBehaviour
     }
 
     /// <summary>
-    /// ‰æ–Ê‚Ì•F‚É“_–Å
+    /// ç”»é¢ã®é»’è‰²ã«ç‚¹æ»…
     /// </summary>
     private void PanelBlink()
     {
@@ -95,7 +95,7 @@ public class FadeControl : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒV[ƒ“‘JˆÚ‚ÆƒtƒF[ƒhƒAƒEƒg ƒ‰ƒbƒp[ŠÖ”
+    /// ã‚·ãƒ¼ãƒ³é·ç§»ã¨ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆ ãƒ©ãƒƒãƒ‘ãƒ¼é–¢æ•°
     /// </summary>
     public void BeginFadeToScene(string sceneName)
     {
@@ -103,7 +103,7 @@ public class FadeControl : MonoBehaviour
     }
 
     /// <summary>
-    /// ‘¼Scene ‚Ö ƒV[ƒ“‘JˆÚ
+    /// ä»–Scene ã¸ ã‚·ãƒ¼ãƒ³é·ç§»
     /// </summary>
     private IEnumerator ChangeScene(string sceneName)
     {
