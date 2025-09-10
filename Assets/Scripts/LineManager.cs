@@ -222,7 +222,7 @@ public class LineManager : MonoBehaviour
     /// <param name="gm"></param>
     public void NotifyLineClicked(GameObject lineObject, GameManager gm)
     {
-        if (!_fixedPathByLine.TryGetValue(lineObject, out var path)) return;
+        if (!_fixedPathByLine.TryGetValue(lineObject, out var cellPath)) return;
 
         // 経路の線オブジェクトを全て探す
         var toRemove = new List<GameObject>();
@@ -230,7 +230,7 @@ public class LineManager : MonoBehaviour
         foreach (var linePathPair in _fixedPathByLine)
         {
             // 同じペアの線
-            if (linePathPair.Value.SequenceEqual(path))
+            if (linePathPair.Value.SequenceEqual(cellPath))
             {
                 toRemove.Add(linePathPair.Key);
             }
@@ -247,11 +247,11 @@ public class LineManager : MonoBehaviour
         }
 
         // 占有セルを非占有に
-        foreach (var cell in path)
+        foreach (var cell in cellPath)
             _fixedOccupiedCells.Remove(cell);
 
         // GameManagerに通知・タイルをUnmatch
-        gm.UndoConfirmMatch(path);
+        gm.UndoConfirmMatch(cellPath);
     }
 
     public void SetAllLinesColliderActive(bool value)
