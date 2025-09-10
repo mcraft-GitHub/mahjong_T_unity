@@ -28,7 +28,6 @@ public class GameManager : MonoBehaviour
     {
         _boardManager.OnSceneChangeRequest += () =>
         {
-            _uiManager.SetRestartButtonInteractable(false);
             _fadeControl.BeginFadeToScene("TitleScene");
         };
     }
