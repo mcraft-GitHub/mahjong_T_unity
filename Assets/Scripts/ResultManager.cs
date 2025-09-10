@@ -1,11 +1,11 @@
-using System.Collections;
+ï»¿using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// ResultScene ‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+/// ResultScene ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class ResultManager : MonoBehaviour
 {
@@ -29,7 +29,7 @@ public class ResultManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒQ[ƒ€Š®—¹Œo‰ßŠÔ‚Ìİ’è
+    /// ã‚²ãƒ¼ãƒ å®Œäº†æ™‚çµŒéæ™‚é–“ã®è¨­å®š
     /// </summary>
     private void SetFinalTimeText()
     {

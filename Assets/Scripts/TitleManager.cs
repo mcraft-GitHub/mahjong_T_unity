@@ -1,10 +1,10 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// TitleScene ‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+/// TitleScene ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
 public class TitleManager : MonoBehaviour
 {
