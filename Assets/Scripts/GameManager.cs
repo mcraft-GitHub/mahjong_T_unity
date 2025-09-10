@@ -40,7 +40,7 @@ public class GameManager : MonoBehaviour
             _uiManager._menuButton.onClick.AddListener(StartNewGame);
 
         if (_uiManager._restartButton != null)
-            _uiManager._restartButton.onClick.AddListener(ResetGame);
+            _uiManager._restartButton.onClick.AddListener(ResetLinePair);
 
         StartNewGame();
     }
@@ -243,7 +243,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 線とペア情報のリセット
     /// </summary>
-    public void ResetGame()
+    public void ResetLinePair()
     {
         _boardManager.ResetLine();
         _boardManager.ResetTilesState();
