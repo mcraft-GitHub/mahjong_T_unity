@@ -38,7 +38,7 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// リスタートボタンを interactable の設定
     /// </summary>
-    public void SetGameButtonInteractable(bool isInteractable)
+    public void SetRestartButtonInteractable(bool isInteractable)
     {
         if(_menuButton != null)
         {

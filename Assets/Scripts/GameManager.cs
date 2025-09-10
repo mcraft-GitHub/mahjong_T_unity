@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour
     {
         _boardManager.OnSceneChangeRequest += () =>
         {
-            _uiManager.SetGameButtonInteractable(false);
+            _uiManager.SetRestartButtonInteractable(false);
             _fadeControl.BeginFadeToScene("TitleScene");
         };
     }
@@ -219,7 +219,7 @@ public class GameManager : MonoBehaviour
         if (_matchedPairs >= _boardManager.GetTotalPairs())
         {
             _lineManager.SetAllLinesColliderActive(false);
-            _uiManager.SetGameButtonInteractable(false);
+            _uiManager.SetRestartButtonInteractable(false);
             GameResultKeeper._Instance.MakeResultTime();
             _fadeControl.BeginFadeToScene("ResultScene");
         }
