@@ -16,7 +16,6 @@ public class GameManager : MonoBehaviour
 
     // ドラッグ中の経路
     private readonly List<Vector2Int> _hoverPath = new();
-    private bool _isDragging = false;
     private static readonly Color DRAG_COLOR = new Color(0.2f, 2.0f, 1f, 1f);
     // 確定(赤)
     private static readonly Color FIXED_COLOR = new Color(2.0f, 0.0f, 0.0f, 1f);
@@ -49,23 +48,38 @@ public class GameManager : MonoBehaviour
     {
         if (!_gameActive || _lineManager == null) return;
 
-        // タイルが1つだけ選択されている場合にドラッグ操作を許可
+        // ドラッグ開始
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (_lineManager.ScreenToCell(Input.mousePosition, out var cell))
+            {
+                Tile startTile = _boardManager.TileAt(cell);
+                if (startTile != null && !startTile._isMatched)
+                {
+                    // 選択リセット・ドラッグタイルを選択
+                    foreach (Tile selectedTile in _selectedTiles)
+                    {
+                        selectedTile.Deselect();
+                    }
+                    _selectedTiles.Clear();
+
+                    _selectedTiles.Add(startTile);
+                    startTile.Select();
+
+                    // パスの初期化
+                    _hoverPath.Clear();
+                    _hoverPath.Add(cell);
+                    _lineManager.DrawHoverPath(_hoverPath, DRAG_COLOR);
+                }
+            }
+        }
+
+        // ドラッグ中の処理
         if (_selectedTiles.Count == 1)
         {
-            var startTile = _selectedTiles[0];
-            var startCell = new Vector2Int(startTile._row, startTile._col);
+            Tile startTile = _selectedTiles[0];
 
-            // ドラッグ開始
-            if (!_isDragging && Input.GetMouseButtonDown(0))
-            {
-                // パスの初期化
-                _hoverPath.Clear();
-                _hoverPath.Add(startCell);
-                _isDragging = true;
-                _lineManager.DrawHoverPath(_hoverPath, DRAG_COLOR);
-            }
-            // 伸ばす(ドラッグ中)
-            if (_isDragging && Input.GetMouseButton(0))
+            if (Input.GetMouseButton(0))
             {
                 if (_lineManager.ScreenToCell(Input.mousePosition, out var cell))
                 {
@@ -73,20 +87,16 @@ public class GameManager : MonoBehaviour
                 }
             }
             // 終了(処理確定)
-            if (_isDragging && Input.GetMouseButtonUp(0))
+            if (Input.GetMouseButtonUp(0))
             {
                 FinishDrag(startTile);
             }
         }
         else
         {
-            // 選択が無い・2つ以上ならドラッグ無効
-            if (_isDragging)
-            {
-                _isDragging = false;
-                _hoverPath.Clear();
-                _lineManager.ClearHoverLines();
-            }
+            // 無効化処理
+            _hoverPath.Clear();
+            _lineManager.ClearHoverLines();
         }
     }
 
@@ -165,8 +175,6 @@ public class GameManager : MonoBehaviour
     /// <param name="startTile"> ドラック開始タイル </param>
     private void FinishDrag(Tile startTile)
     {
-        _isDragging = false;
-
         if (_hoverPath.Count < 2)
         {
             _lineManager.ClearHoverLines();
@@ -234,7 +242,6 @@ public class GameManager : MonoBehaviour
         _matchedPairs = 0;
         GameResultKeeper._Instance.StartTime();
         _gameActive = true;
-        _isDragging = false;
         _hoverPath.Clear();
         StartCoroutine(_uiManager.UpdateTimer(_gameActive));
         _uiManager.UpdateUI(_boardManager.GetTotalPairs(), _matchedPairs);
@@ -250,7 +257,6 @@ public class GameManager : MonoBehaviour
 
         _matchedPairs = 0;
         _gameActive = true;
-        _isDragging = false;
         _hoverPath.Clear();
         StartCoroutine(_uiManager.UpdateTimer(_gameActive));
         _uiManager.UpdateUI(_boardManager.GetTotalPairs(), _matchedPairs);
