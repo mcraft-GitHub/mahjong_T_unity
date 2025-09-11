@@ -18,28 +18,10 @@ public class TileSelector : MonoBehaviour
 
     private void Update()
     {
-        // クリック
-        if (Input.GetMouseButtonDown(0))
-        {
-            HandleClick();
-        }
-
         // ドラッグ
         if (Input.GetMouseButton(0))
         {
             HandleDrag();
-        }
-    }
-
-    /// <summary>
-    /// クリックされたタイルを取得し,GameManagerに通知
-    /// </summary>
-    private void HandleClick()
-    {
-        Tile tile = GetTileUnderMouse();
-        if (tile != null)
-        {
-            _gameManager.OnTileClicked(tile);
         }
     }
 

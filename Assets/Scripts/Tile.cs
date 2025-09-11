@@ -42,12 +42,17 @@ public class Tile : MonoBehaviour
         _renderer = GetComponent<Renderer>();
         _collider = GetComponent<Collider>();
 
-        _mpb = new MaterialPropertyBlock();
+        if (_renderer != null)
+        {
+            _mpb = new MaterialPropertyBlock();
 
-        if (_renderer != null && _renderer.sharedMaterial != null && _renderer.sharedMaterial.HasProperty(_colorPropId))
-            _originalColor = _renderer.sharedMaterial.GetColor(_colorPropId);
+            if (_renderer.sharedMaterial != null && _renderer.sharedMaterial.HasProperty(_colorPropId))
+            {
+                _originalColor = _renderer.sharedMaterial.GetColor(_colorPropId);
+            }
 
-        ApplyColor(_originalColor);
+            ApplyColor(_originalColor);
+        }
     }
 
     /// <summary>
@@ -123,6 +128,10 @@ public class Tile : MonoBehaviour
     private void ApplyColor(Color c)
     {
         if (_renderer == null) return;
+        if (_mpb == null)
+        {
+            _mpb = new MaterialPropertyBlock();
+        }
         _mpb.SetColor(_colorPropId, c);
         _renderer.SetPropertyBlock(_mpb);
     }
