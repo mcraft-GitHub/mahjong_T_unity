@@ -83,6 +83,9 @@ public class SoundManager : MonoBehaviour
     /// </summary>
     public void StopBGM()
     {
-        if (_bgmSource != null) _bgmSource.Stop();
+        if (_bgmSource != null)
+        {
+            _bgmSource.Stop();
+        }
     }
 }
