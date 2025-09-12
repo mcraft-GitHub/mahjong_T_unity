@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour
         if (_uiManager._restartButton != null)
             _uiManager._restartButton.onClick.AddListener(ResetLinePair);
 
+        SoundManager.Instance.PlayBGM("BgmGame");
+
         StartNewGame();
     }
 
@@ -117,6 +119,7 @@ public class GameManager : MonoBehaviour
         {
             _hoverPath.RemoveAt(_hoverPath.Count - 1);
             _lineManager.DrawHoverPath(_hoverPath, DRAG_COLOR);
+            SoundManager.Instance.PlaySE("SeDragMove");
             return;
         }
 
@@ -142,6 +145,7 @@ public class GameManager : MonoBehaviour
                 // 終点は可
                 _hoverPath.Add(cell);
                 _lineManager.DrawHoverPath(_hoverPath, DRAG_COLOR);
+                SoundManager.Instance.PlaySE("SeDragMove");
                 FinishDrag(startTile);
                 return;
             }
@@ -154,6 +158,7 @@ public class GameManager : MonoBehaviour
         // 空きセルなので延長
         _hoverPath.Add(cell);
         _lineManager.DrawHoverPath(_hoverPath, DRAG_COLOR);
+        SoundManager.Instance.PlaySE("SeDragMove");
     }
 
     /// <summary>
@@ -191,6 +196,8 @@ public class GameManager : MonoBehaviour
             ConfirmMatch(_hoverPath);
             _hoverPath.Clear();
             _selectedTiles.Clear();
+
+            SoundManager.Instance.PlaySE("SePairConfirmed");
         }
         else
         {

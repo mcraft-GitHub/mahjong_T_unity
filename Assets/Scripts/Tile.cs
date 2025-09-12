@@ -99,6 +99,8 @@ public class Tile : MonoBehaviour
         if (_collider != null) _collider.enabled = false;
 
         transform.Rotate(180f, 0f, 0f, Space.Self);
+
+        SoundManager.Instance.PlaySE("SePairConfirmed");
     }
 
     /// <summary>
@@ -119,6 +121,8 @@ public class Tile : MonoBehaviour
 
         // 回転の初期化
         transform.localRotation = Quaternion.identity;
+
+        SoundManager.Instance.PlaySE("SePairCancel");
     }
 
     /// <summary>

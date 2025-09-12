@@ -15,5 +15,7 @@ public class TitleManager : MonoBehaviour
     {
         if (_startButton != null)
             _startButton.onClick.AddListener(() => _fadeControl.BeginFadeToScene("GameScene"));
+
+        SoundManager.Instance.PlayBGM("BgmTitle");
     }
 }

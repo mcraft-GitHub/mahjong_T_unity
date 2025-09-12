@@ -25,6 +25,8 @@ public class ResultManager : MonoBehaviour
         if (_backToTitleButton != null)
             _backToTitleButton.onClick.AddListener(() => _fadeControl.BeginFadeToScene("TitleScene"));
 
+        SoundManager.Instance.PlayBGM("BgmResult");
+
         SetFinalTimeText();
     }
 
