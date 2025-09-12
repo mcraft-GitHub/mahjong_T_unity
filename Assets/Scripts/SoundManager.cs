@@ -77,4 +77,12 @@ public class SoundManager : MonoBehaviour
             _seSource.PlayOneShot(clip);
         }
     }
+
+    /// <summary>
+    /// BGMを停止する
+    /// </summary>
+    public void StopBGM()
+    {
+        if (_bgmSource != null) _bgmSource.Stop();
+    }
 }
