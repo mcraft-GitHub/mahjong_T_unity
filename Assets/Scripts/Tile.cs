@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 /// <summary>
 /// 盤上の1マスを表すタイルのクラス
@@ -36,6 +37,10 @@ public class Tile : MonoBehaviour
 
     private MaterialPropertyBlock _mpb;
     private static readonly int _colorPropId = Shader.PropertyToID("_Color");
+
+    // 回転アニメーション用
+    private Coroutine _flipAnimationCoroutine;
+    private const float _flipDuration = 0.5f;
 
     private void Awake()
     {
@@ -98,7 +103,7 @@ public class Tile : MonoBehaviour
         ApplyColor(_matchedColor);
         if (_collider != null) _collider.enabled = false;
 
-        transform.Rotate(180f, 0f, 0f, Space.Self);
+        FlipTile(true);
 
         SoundManager.Instance.PlaySE("SePairConfirmed");
 
@@ -125,7 +130,7 @@ public class Tile : MonoBehaviour
         }
 
         // 回転の初期化
-        transform.localRotation = Quaternion.identity;
+        FlipTile(false);
 
         SoundManager.Instance.PlaySE("SePairCancel");
     }
@@ -143,6 +148,43 @@ public class Tile : MonoBehaviour
         }
         _mpb.SetColor(_colorPropId, c);
         _renderer.SetPropertyBlock(_mpb);
+    }
+
+    /// <summary>
+    /// タイルを裏返すアニメーション
+    /// </summary>
+    /// <param name="isMatch"> マッチ成立(表) or マッチ解除(裏) </param>
+    public void FlipTile(bool isMatch)
+    {
+        float targetAngle = isMatch ? 180f : 0f;
+        if (_flipAnimationCoroutine != null)
+        {
+            StopCoroutine(_flipAnimationCoroutine);
+        }
+        _flipAnimationCoroutine = StartCoroutine(AnimateRotationY(targetAngle, _flipDuration));
+    }
+
+    /// <summary>
+    /// Y軸回転アニメーション
+    /// </summary>
+    /// <param name="angle"></param>
+    /// <param name="duration"></param>
+    /// <returns></returns>
+    private IEnumerator AnimateRotationY(float targetAngle, float duration)
+    {
+        Quaternion startRot = transform.localRotation;
+        Quaternion endRot = Quaternion.Euler(0, targetAngle, 0);
+
+        float elapsedTime = 0f;
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            transform.localRotation = Quaternion.Slerp(startRot, endRot, elapsedTime / duration);
+            yield return null;
+        }
+
+        transform.localRotation = endRot;
+        _flipAnimationCoroutine = null;
     }
 
     /// <summary>
