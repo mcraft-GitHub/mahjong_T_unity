@@ -101,6 +101,11 @@ public class Tile : MonoBehaviour
         transform.Rotate(180f, 0f, 0f, Space.Self);
 
         SoundManager.Instance.PlaySE("SePairConfirmed");
+
+        if(EffectManager._Instance != null)
+        {
+            EffectManager._Instance.PlayEffect("FxPairConfirmed", transform.position);
+        }
     }
 
     /// <summary>
