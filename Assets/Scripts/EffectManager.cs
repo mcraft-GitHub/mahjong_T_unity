@@ -24,7 +24,7 @@ public class EffectManager : MonoBehaviour
         public int _initialPoolSize = 5;
     }
 
-    [SerializeField] private float zOffset = -1f;
+    [SerializeField] private float _zOffset = -1f;
 
     [Header("Effect List")]
     [SerializeField] private List<EffectConfig> effectConfigs = new List<EffectConfig>();
@@ -80,7 +80,7 @@ public class EffectManager : MonoBehaviour
         }
 
         GameObject effectObject = pool.Dequeue();
-        position.z += zOffset;
+        position.z += _zOffset;
         effectObject.transform.position = position;
         effectObject.SetActive(true);
 
