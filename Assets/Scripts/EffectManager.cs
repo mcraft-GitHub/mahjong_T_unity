@@ -52,7 +52,7 @@ public class EffectManager : MonoBehaviour
 
             // プール初期化
             var queue = new Queue<GameObject>();
-            for (int i = 0; i < config._initialPoolSize; i++)
+            for (var i = 0; i < config._initialPoolSize; i++)
             {
                 GameObject obj = Instantiate(config._prefab, transform);
                 obj.SetActive(false);
