@@ -34,16 +34,7 @@ public class EffectManager : MonoBehaviour
 
     void Awake()
     {
-        if (_Instance == null)
-        {
-            _Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        if(!InitializeSingleton()) return;
 
         foreach (var config in _effectConfigs)
         {
@@ -108,5 +99,24 @@ public class EffectManager : MonoBehaviour
         yield return new WaitForSeconds(delay);
         effectObject.SetActive(false);
         _effectPoolsById[id].Enqueue(effectObject);
+    }
+
+    /// <summary>
+    /// インスタンス破棄処理
+    /// </summary>
+    /// <returns></returns>
+    private bool InitializeSingleton()
+    {
+        if (_Instance == null)
+        {
+            _Instance = this;
+            DontDestroyOnLoad(gameObject);
+            return true;
+        }
+        else
+        {
+            Destroy(gameObject);
+            return false;
+        }
     }
 }
