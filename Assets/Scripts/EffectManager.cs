@@ -27,7 +27,7 @@ public class EffectManager : MonoBehaviour
     [SerializeField] private float _zOffset = -1f;
 
     [Header("Effect List")]
-    [SerializeField] private List<EffectConfig> effectConfigs = new List<EffectConfig>();
+    [SerializeField] private List<EffectConfig> _effectConfigs = new List<EffectConfig>();
 
     private Dictionary<string, Queue<GameObject>> _effectPoolsById = new Dictionary<string, Queue<GameObject>>();
     private Dictionary<string, EffectConfig> _effectConfigsById = new();
@@ -45,7 +45,7 @@ public class EffectManager : MonoBehaviour
             return;
         }
 
-        foreach (var config in effectConfigs)
+        foreach (var config in _effectConfigs)
         {
             // キャッシュ
             _effectConfigsById[config._id] = config;
