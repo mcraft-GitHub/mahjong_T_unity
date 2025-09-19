@@ -31208,6 +31208,8 @@ MonoBehaviour:
   - {fileID: 4925099041525288053, guid: fc985a84480c73a43bd269c5510d8988, type: 3}
   _gridParent: {fileID: 1558384137}
   _lineManager: {fileID: 424863563}
+  _blockPrefab: {fileID: 7398369582418883592, guid: 4b2baaaeee165544b9c05ea1db93b524, type: 3}
+  _randomBlockCount: 15
 --- !u!4 &1610213609
 Transform:
   m_ObjectHideFlags: 0
