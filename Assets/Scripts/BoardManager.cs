@@ -22,12 +22,19 @@ public class BoardManager : MonoBehaviour
     private Tile[,] _tiles;
     private List<Tile> _selectedTiles = new();
     private int _totalPairs = 0;
+    // 経路
+    private HashSet<Vector2Int> _occupiedPathCells = new HashSet<Vector2Int>();
 
     private System.Random _rand = new System.Random();
 
     static readonly int MAX_PATHS_PER_PAIR = 40;
     static readonly int MAX_PLACEMENT_ATTEMPTS = 800;
     static readonly int PATH_SLACK = 6;
+
+    // 初期通過不可タイル
+    [SerializeField] private GameObject _blockPrefab;
+    [SerializeField] private int _randomBlockCount = 5;
+    private HashSet<Vector2Int> _blockCells = new HashSet<Vector2Int>();
 
     // 探索方向(上下左右)
     static readonly Vector2Int[] DIRS = 
@@ -62,7 +69,62 @@ public class BoardManager : MonoBehaviour
 
         ResetLine();
 
+        _blockCells.Clear();
         GenerateBoardSafe();
+        // 通過不可タイルの設定
+        AddRandomBlocks();
+    }
+
+    /// <summary>
+    /// ランダムに通過不可タイルを追加(ペアタイルとその経路以外)
+    /// </summary>
+    private void AddRandomBlocks()
+    {
+        List<Vector2Int> candidates = new List<Vector2Int>();
+
+        for (var x = 0; x < _gridSize; x++)
+        {
+            for (var y = 0; y < _gridSize; y++)
+            {
+                Vector2Int pos = new Vector2Int(x, y);
+
+                if (_tiles[x, y] != null) continue;
+                if (_occupiedPathCells.Contains(pos)) continue;
+
+                candidates.Add(pos);
+            }
+        }
+
+        Shuffle(candidates);
+
+        int blockCount = Mathf.Min(_randomBlockCount, candidates.Count);
+        for (var i = 0; i < blockCount; i++)
+        {
+            Vector2Int pos = candidates[i];
+            int x = pos.x;
+            int y = pos.y;
+
+            _blockCells.Add(pos);
+
+            if (_blockPrefab != null)
+            {
+                GameObject go = Instantiate(_blockPrefab, _gridParent);
+
+                float xOffset = (x - (_gridSize - 1) * 0.5f) * _cellSpacing;
+                float yOffset = (y - (_gridSize - 1) * 0.5f) * _cellSpacing;
+
+                go.transform.localPosition = new Vector3(xOffset, yOffset, 0f);
+                go.transform.localRotation = Quaternion.identity;
+                go.transform.localScale = Vector3.one;
+
+                Tile blockTile = go.GetComponent<Tile>();
+                if (blockTile != null)
+                {
+                    blockTile.Setup(x, y, null);
+                    _tiles[x, y] = blockTile;
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -83,8 +145,17 @@ public class BoardManager : MonoBehaviour
             // 盤面セルリスト
             List<Vector2Int> allCells = new List<Vector2Int>();
             for (var x = 0; x < _gridSize; x++)
+            {
                 for (var y = 0; y < _gridSize; y++)
-                    allCells.Add(new Vector2Int(x, y));
+                {
+                    var pos = new Vector2Int(x, y);
+                    if (_blockCells.Contains(pos)) continue;
+                    allCells.Add(pos);
+                }
+            }
+            // ペアを作れるだけセルが残っていない場合はスキップ
+            if (allCells.Count < typeCount * 2) continue;
+
             Shuffle(allCells);
 
             List<Vector2Int> chosen = allCells.GetRange(0, typeCount * 2);
@@ -142,6 +213,9 @@ public class BoardManager : MonoBehaviour
     /// </summary>
     private bool TryRouteAllPairs(List<PairPlacement> pairs)
     {
+        // 経路セルの初期化
+        _occupiedPathCells.Clear();
+
         // 全てのペアの両端を占有
         bool[,] tileOccupied = new bool[_gridSize, _gridSize];
         foreach (var p in pairs)
@@ -172,6 +246,16 @@ public class BoardManager : MonoBehaviour
         // 再帰でルーティング
         var chosenPaths = new List<List<Vector2Int>>(); // optional: store chosen paths
         bool ok = RoutePairsRecursive(pairsOrdered, 0, tileOccupied, occupiedPaths, chosenPaths);
+        if (ok)
+        {
+            for (int i = 0; i < chosenPaths.Count; i++)
+            {
+                for (int j = 0; j < chosenPaths[i].Count; j++)
+                {
+                    _occupiedPathCells.Add(chosenPaths[i][j]);
+                }
+            }
+        }
         return ok;
     }
 
@@ -345,6 +429,7 @@ public class BoardManager : MonoBehaviour
                 if (n == end) return dist + 1;
                 if (tileOccupied[n.x, n.y]) continue;
                 if (occupiedPaths[n.x, n.y]) continue;
+                if (_blockCells.Contains(n)) continue;
 
                 vis[n.x, n.y] = true;
                 q.Enqueue((n, dist + 1));
@@ -394,6 +479,17 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 指定セルが通過不可タイルかどうか
+    /// </summary>
+    /// <param name="cell"></param>
+    /// <returns></returns>
+    public bool IsCellBlock(Vector2Int cell)
+    {
+        if (cell.x < 0 || cell.x >= _gridSize || cell.y < 0 || cell.y >= _gridSize) return false;
+        return _blockCells.Contains(cell);
+    }
+
+    /// <summary>
     /// lineのリセット
     /// </summary>
     public void ResetLine()
@@ -424,6 +520,7 @@ public class BoardManager : MonoBehaviour
     {
         if (_tiles == null) return null;
         if (cell.x < 0 || cell.x >= _tiles.GetLength(0) || cell.y < 0 || cell.y >= _tiles.GetLength(1)) return null;
+        if (_blockCells.Contains(cell)) return null;
         return _tiles[cell.x, cell.y];
     }
 
