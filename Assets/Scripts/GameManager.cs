@@ -114,6 +114,9 @@ public class GameManager : MonoBehaviour
         var last = _hoverPath[_hoverPath.Count - 1];
         if (cell == last) return;
 
+        // 通過不可
+        if (_boardManager.IsCellBlock(cell)) return;
+
         // 1つ戻る
         if (_hoverPath.Count >= 2 && cell == _hoverPath[_hoverPath.Count - 2])
         {
