@@ -88,7 +88,6 @@ public class BoardManager : MonoBehaviour
             {
                 Vector2Int pos = new Vector2Int(x, y);
 
-                if (_blockCells.Contains(pos)) continue;
                 if (_tiles[x, y] != null) continue;
                 if (_occupiedPathCells.Contains(pos)) continue;
 
